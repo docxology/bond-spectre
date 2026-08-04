@@ -1,10 +1,11 @@
-# References {#sec:references}
+# References
 
-Bibliography lives in [`manuscript/references.bib`](references.bib) and is read by Pandoc during PDF render. The build pipeline invokes Pandoc with `--natbib`, so every `[@key]` citation in the manuscript is rewritten to the appropriate `\cite{}`/`\citep{}`/`\citet{}` LaTeX command and resolved against the bib file.
-
-To validate that `references.bib` is syntactically clean and contains the required fields per entry type:
-
-```bash
-uv run python -m infrastructure.reference.citation.cli validate \
-    projects/working/bond/spectre/manuscript/references.bib --strict
-```
+1. *Spectre* (2015), Metro-Goldwyn-Mayer / Columbia Pictures — source of the
+   Nine Eyes programme and the SPECTRE brotherhood conceit.
+2. L. Freeman, *Centrality in social networks: Conceptual clarification*,
+   Social Networks 1 (1979) — the group centralization index.
+3. M. E. J. Newman, *Networks: An Introduction*, Oxford University Press
+   (2010) — connectivity, betweenness (Brandes), articulation points, and
+   network-efficiency measures.
+4. BOND suite — PROJECT BOND *MissionProvider* protocol (FROZEN `bond_api`),
+   the shared mission-orchestration contract this film package implements.

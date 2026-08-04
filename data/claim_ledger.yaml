@@ -1,57 +1,36 @@
 claims:
-  - claim_id: figure-export-dpi
+  - claim_id: nine-eyes-centralization-index
     kind: number
-    value: 300
-    source: projects/working/bond/spectre/src/viz_config.py plotting defaults (dpi)
-    source_tier: project_source
-    freshness: active
-    artifact_path: output/figures/convergence_plot.png
-  - claim_id: step-size-sensitivity-cap
-    kind: number
-    value: 500
-    source: projects/working/bond/spectre/src/sweeps.py sensitivity_sweep max_iter cap
+    value: 0.9219
+    source: src/spectre/mission.py execute() measured group_centralization (canonical network)
     source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/step_size_sensitivity.png
-  - claim_id: stability-log-lower
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-flow-concentration-hhi
     kind: number
-    value: -6
-    source: projects/working/bond/spectre/src/figures/scientific_stability.py stability visualization caption
-    source_tier: project_source
+    value: 0.125
+    source: src/spectre/mission.py execute() herfindahl_index over inflow shares
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/stability_analysis.png
-  - claim_id: solution-relative-error-exponent
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-cascade-coverage
     kind: number
-    value: -4
-    source: projects/working/bond/spectre/manuscript/03_results.md stated precision threshold
-    source_tier: manuscript_claim
+    value: 0.4444
+    source: src/spectre/mission.py cascade_coverage(("US",), 0.6) fixed-seed deterministic
+    source_tier: generated_metric
     freshness: active
-    artifact_path: manuscript/03_results.md
-  - claim_id: stability-log-upper
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: spectre-compartmentalization
     kind: number
-    value: -9
-    source: projects/working/bond/spectre/src/figures/scientific_stability.py stability visualization caption
-    source_tier: project_source
+    value: 0.7407
+    source: src/spectre/mission.py org_intel.compartmentalization (canonical brotherhood)
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/stability_analysis.png
-  - claim_id: benchmark-tolerance-exponent
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-network-efficiency
     kind: number
-    value: -10
-    source: projects/working/bond/spectre/scripts/optimization_analysis.py dimensional benchmark tolerance
-    source_tier: project_source
+    value: 0.6806
+    source: src/spectre/mission.py network_geometry.network_efficiency (undirected)
+    source_tier: generated_metric
     freshness: active
-    artifact_path: output/figures/performance_benchmark.png
-  - claim_id: benchmark-min-iterations
-    kind: number
-    value: 219
-    source: projects/working/bond/spectre/manuscript/03_results.md benchmark caption
-    source_tier: manuscript_claim
-    freshness: active
-    artifact_path: output/figures/performance_benchmark.png
-  - claim_id: benchmark-max-iterations
-    kind: number
-    value: 238
-    source: projects/working/bond/spectre/manuscript/03_results.md benchmark caption
-    source_tier: manuscript_claim
-    freshness: active
-    artifact_path: output/figures/performance_benchmark.png
+    artifact_path: output/data/manuscript_variables.json

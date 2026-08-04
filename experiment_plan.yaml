@@ -1,25 +1,26 @@
 conditions:
-  - name: conservative_step
+  - name: low_centralization
     role: reference
-    description: "Stable gradient-descent step below the spectral bound."
-  - name: near_optimal_step
+    description: "Evenly spread data flows (low Freeman centralization)."
+  - name: hub_centralization
     role: proposed
-    description: "Template-recommended step near the stable convergence region."
-  - name: aggressive_step
+    description: "Nine Eyes canonical network with a dominant hub agency."
+  - name: fragmented_network
     role: variant
-    description: "Stress condition near or above the stability boundary."
+    description: "Stress condition targeting articulation-point removal."
 metrics:
   primary:
-    name: objective_value
-    direction: minimize
-protocol: "Run the deterministic quadratic optimization sweep with identical initialization, seeds, tolerance, and iteration cap across all declared step-size conditions."
+    name: centralization_index
+    direction: maximize
+  secondary:
+    - name: compartmentalization
+      direction: maximize
+    - name: network_efficiency
+      direction: maximize
+protocol: "Run the deterministic NINE EYES mission provider over the canonical dataset with an identical fixed seed, no mock, and identical provenance hashing across all declared conditions."
 expected_figures:
-  - fig:convergence_plot
-  - fig:performance_benchmark
-  - fig:step_size_sensitivity
-expected_tables:
-  - tbl:optimization_results
+  - fig:network_flow_centralization
 baselines:
-  - conservative_step
+  - low_centralization
 ablations:
-  - aggressive_step
+  - fragmented_network

@@ -1,11 +1,24 @@
-# Abstract {#sec:abstract}
+# Abstract
 
-This paper presents a convergence study of **fixed-step gradient descent** on a convex quadratic, framed as the computational exemplar of the [Research Project Template](https://github.com/docxology/template). The implementation lives in `projects/working/bond/spectre/src/optimizer.py`; experiments and figures are orchestrated by `projects/working/bond/spectre/scripts/optimization_analysis.py` and hydrated into the manuscript through `scripts/z_generate_manuscript_variables.py`, so tables and prose track `output/data/optimization_results.csv` after every pipeline run.
+This report describes **{{SPECTRE_TITLE}}** (mission codename
+**{{SPECTRE_CODENAME}}**), a special-agent mission-software package modelling
+the global surveillance programme from the 2015 film *Spectre*. Working over
+three analytic concepts, it (i) measures the centralization of a nine-agency
+surveillance network whose data flows concentrate through hub agencies, (ii)
+models the SPECTRE brotherhood as a compartmentalized criminal organization
+with an isolatable command hierarchy, and (iii) analyzes the network's
+geometry to identify the critical nodes whose neutralization most fragments
+the system.
 
-We evaluate {{CONFIG_NUM_STEP_SIZES}} step sizes from $\alpha = {{CONFIG_MIN_STEP_SIZE}}$ to $\alpha = {{CONFIG_MAX_STEP_SIZE}}$, spanning conservative, near-optimal, aggressive, and divergent regimes for a unit Hessian model. The build chain exercises template infrastructure end-to-end: scientific helpers (`infrastructure.scientific.stability`, `infrastructure.scientific.benchmarking`), validation, rendering (`infrastructure/rendering/pdf_renderer.py`), and reporting. Accessibility-oriented plotting defaults (colourblind-safe palette, 300 dpi exports) are centralized in `src/figures/` and `src/analysis/`.
+Over the canonical NINE EYES network of {{SPECTRE_NUM_NODES}} agencies and
+{{SPECTRE_NUM_EDGES}} directed data-sharing links, the measured group
+centralization index is {{SPECTRE_CENTRALIZATION_INDEX}} and the flow
+concentration (Herfindahl index) is {{SPECTRE_FLOW_CONCENTRATION_HHI}}. The
+SPECTRE brotherhood of {{SPECTRE_NUM_OPERATIVES}} operatives across
+{{SPECTRE_NUM_CELLS}} cells achieves a compartmentalization of
+{{SPECTRE_COMPARTMENTALIZATION}} with a command chain that is complete
+({{SPECTRE_CHAIN_COMPLETE}}) to a height of {{SPECTRE_HIERARCHY_HEIGHT}}.
+Geometry analysis finds {{SPECTRE_NUM_ARTICULATION_POINTS}} articulation points;
+the most load-bearing critical nodes are {{SPECTRE_CRITICAL_NODES}}.
 
-Contributions are **methodological** and **architectural**. On the methods side, we relate empirical iteration counts and error decay to the scalar contraction factor $\rho(\alpha) = |1-\alpha|$ and document cases where runs hit $N_{\max} = {{CONFIG_MAX_ITERATIONS}}$ before meeting the gradient tolerance. On the architecture side, we demonstrate a zero-mock test suite on project `src/` (see [test_optimizer.py](https://github.com/docxology/template/blob/main/projects/working/bond/spectre/tests/test_optimizer.py)), automated six-figure analysis, and reproducibility metadata (configuration hash, artifact counts) injected into [@sec:reproducibility].
-
-**Results (this configuration):** {{RESULT_NUM_CONVERGED}} of {{CONFIG_NUM_STEP_SIZES}} grid points report `converged=True` in the CSV; non-convergent rows flag either slow progress at small $\alpha$ under the iteration cap or instability when $|1-\alpha| \geq 1$. The analytical minimizer remains $x^\ast = {{RESULT_OPTIMUM_X}}$ with $f(x^\ast) = {{RESULT_OPTIMUM_F}}$ for the configured $(A,b)$.
-
-**Keywords:** {{CONFIG_KEYWORDS}}
+*Keywords:* {{SPECTRE_KEYWORDS}}

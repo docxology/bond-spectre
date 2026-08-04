@@ -1,22 +1,24 @@
-authors:
-- affiliation: Active Inference Institute
-  family-names: Friedman
-  given-names: Daniel Ari
-  orcid: 0000-0001-6232-9096
 cff-version: 1.2.0
-date-released: '2026-07-10'
-doi: 10.5281/zenodo.20417136
+message: "If you use this software, please cite it as below."
+title: "Spectre: NINE EYES — Special-Agent Mission Software"
+abstract: >-
+  BOND film package for Spectre (2015), mission codename NINE EYES. Models the
+  global surveillance programme: surveillance-network data-flow centralization,
+  criminal-organisation cell structure (SPECTRE), and network geometry
+  (connectivity, critical nodes). Deterministic, zero-mock, protocol-driven.
+authors:
+  - family-names: Friedman
+    given-names: Daniel Ari
+    orcid: "0000-0001-6232-9096"
+    affiliation: "Active Inference Institute"
 keywords:
-- optimization algorithms
-- gradient descent
-- convergence analysis
-- numerical methods
-- mathematical programming
-- reproducible research
-- infrastructure automation
+  - surveillance networks
+  - data-flow centralization
+  - criminal-organisation intelligence
+  - cell compartmentalization
+  - network geometry
+  - critical nodes
+  - active inference
 license: MIT
-message: If you use this software, please cite it using the metadata from this file.
-repository-code: https://github.com/docxology/spectre
-title: Convergence Analysis of Gradient Descent Optimization
-type: software
-version: 2.5.2
+version: "0.1.0"
+date-released: "2026-08-04"
