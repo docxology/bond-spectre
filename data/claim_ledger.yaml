@@ -34,3 +34,45 @@ claims:
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-traffic-total
+    kind: number
+    value: 1360.0
+    source: src/spectre/mission.py traffic_intel.total_traffic (canonical)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-monitor-coverage-budget3
+    kind: number
+    value: 0.9669
+    source: src/spectre/mission.py traffic_intel.monitor_allocation (budget 3)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: spectre-expected-compromise-fraction
+    kind: number
+    value: 0.8067
+    source: src/spectre/mission.py infiltration.expected_damage (Mr White, p=0.5, 50 trials)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: spectre-leadership-hit-rate
+    kind: number
+    value: 0.86
+    source: src/spectre/mission.py infiltration.expected_damage leadership_hit_rate
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-set-cover-size
+    kind: number
+    value: 4
+    source: src/spectre/mission.py signal_cover.greedy_set_cover (canonical)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: nine-eyes-cover-redundancy
+    kind: number
+    value: 0.25
+    source: src/spectre/mission.py signal_cover.redundancy_index (greedy cover)
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json

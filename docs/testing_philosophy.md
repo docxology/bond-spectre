@@ -26,10 +26,14 @@ Live test count and achieved coverage are tracked in
 | `test_surveillance_net.py` | centrality, centralization, HHI, betweenness, cascade, sweep + all error branches |
 | `test_org_intel.py` | hierarchy, cells, compartmentalization, reachability, exposure + validation errors |
 | `test_network_geometry.py` | connectivity, articulation points, efficiency, robustness, critical order + errors |
-| `test_mission.py` | protocol compliance, determinism, provenance, gadgets, discovery |
+| `test_traffic_intel.py` | traffic build/validation, heavy hitters, interception coverage, submodular monitor allocation + errors |
+| `test_infiltration.py` | compromise-cascade spread/determinism, damage metrics, seed/probability/trials validation |
+| `test_signal_cover.py` | coverage build/validation, greedy set cover (incl. tie-breaks), redundancy, uncovered targets |
+| `test_mission.py` | protocol compliance, determinism, provenance, gadgets, discovery, 6-phase plan |
 | `test_manuscript_variables.py` | config loading, token map, live `{{TOKEN}}` cross-reference, tree resolution |
 | `test_figures.py` | figure PNG writing + empty-network error |
 | `test_scripts_smoke.py` | subprocess execution of every CLI with artifact assertions |
+| `test_domain_isolation.py` | subprocess proof that the six pure core modules import without `bond_api` |
 
 ## Error-branch principle
 

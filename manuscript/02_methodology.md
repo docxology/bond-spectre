@@ -36,3 +36,34 @@ low-link DFS. Global efficiency is the mean inverse shortest-path length.
 Critical-node ordering greedily removes, at each step, the node whose removal
 most reduces pairwise connectivity — an attack simulation of network
 fragmentation.
+
+## Traffic interception (deepening)
+
+The traffic-intelligence model treats the surveillance network as carrying a
+volume-weighted exchange (`spectre.traffic_intel`). A monitored agency
+intercepts every link incident to it; the coverage of a monitored set is the
+fraction of total traffic those links carry. Because a new agency's marginal
+interception gain shrinks as coverage grows, allocating a monitoring budget is
+a monotone submodular coverage-maximization problem; the greedy rule (pick the
+agency adding the most new traffic, ties broken deterministically) carries the
+Nemhauser–Wolsey–Fisher `(1 - 1/e)` guarantee.
+
+## Compromise cascade (deepening)
+
+The infiltration model (`spectre.infiltration`) simulates the brotherhood's
+defining weakness: turn one operative and their cellmates, superior, and
+subordinates are exposed. A round-based cascade compresses this through the
+hierarchy, each exposed operative turning with a fixed probability — a
+percolation process over the org graph (cf. epidemic spread on networks). We
+report the expected fraction compromised, the rate at which leadership is
+reached, and the mean cascade rounds to leadership, averaged over fixed-seed
+deterministic trials.
+
+## Sensor-placement cover (deepening)
+
+The placement model (`spectre.signal_cover`) poses the surveillance programme
+as a set-cover problem over agencies × targets: which agencies to place so that
+the required fraction of targets is swept. The greedy set-cover heuristic
+(Johnson) selects agencies by largest marginal gain and stays within a factor
+`O(log n)` of the minimum cover; coverage redundancy measures the fraction of
+targets swept by at least two agencies, a multi-sensor resilience metric.

@@ -10,6 +10,9 @@ global surveillance programme with three pure, deterministic analytic concepts.
 | `src/spectre/surveillance_net.py` | Data-flow centralization | Directed agency network, out/in-degree centrality, Freeman group centralization, Herfindahl flow concentration, deterministic cascade coverage, sweep coverage |
 | `src/spectre/org_intel.py` | Criminal-org cell model | SPECTRE hierarchy depths/height, cell membership, compartmentalization (cross-cell leak), command-chain reachability, per-operative exposure |
 | `src/spectre/network_geometry.py` | Connectivity & critical nodes | Connected components, articulation points (Tarjan), global efficiency, node-removal impact, robustness-under-attack curve, greedy critical-node ordering |
+| `src/spectre/traffic_intel.py` | Traffic interception | Volume-weighted traffic network, heavy-hitter links, interception coverage from monitored agencies, greedy submodular monitoring-budget allocation |
+| `src/spectre/infiltration.py` | Compromise cascade | Round-based compromise cascade through the brotherhood, expected-compromise damage, leadership hit rate, steps to leadership |
+| `src/spectre/signal_cover.py` | Sensor-placement cover | Agency × target coverage matrix, greedy set cover, per-target coverage counts, uncovered targets, multi-sensor coverage redundancy |
 
 Every metric in the manuscript is **measured** — computed by the deterministic
 NINE EYES mission provider and injected through

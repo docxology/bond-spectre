@@ -67,6 +67,12 @@ class TestBrief:
             "compartmentalization",
             "network_efficiency",
             "critical_nodes",
+            "traffic_total",
+            "monitor_coverage_budget3",
+            "expected_compromise_fraction",
+            "leadership_hit_rate",
+            "set_cover_size",
+            "coverage_redundancy",
         ):
             assert key in outcome.results
 
@@ -84,7 +90,7 @@ class TestBrief:
     def test_run_mission_flow(self) -> None:
         debrief = run_mission(PROVIDER, ReconRequest(goal="full flow"))
         assert debrief.outcome.success is True
-        assert debrief.outcome.results["plan_steps"] == 3
+        assert debrief.outcome.results["plan_steps"] == 6
 
 
 class TestProvenance:
@@ -100,9 +106,15 @@ class TestProvenance:
 class TestRegistry:
     def test_register_gadgets(self) -> None:
         registry = register_gadgets(GadgetRegistry())
-        assert registry.contains("spectre", "surveillance_centralization")
-        assert registry.contains("spectre", "org_compartmentalization")
-        assert registry.contains("spectre", "geometry_efficiency")
+        for gadget in (
+            "surveillance_centralization",
+            "org_compartmentalization",
+            "geometry_efficiency",
+            "traffic_interception",
+            "infiltration_damage",
+            "signal_set_cover",
+        ):
+            assert registry.contains("spectre", gadget), gadget
         assert "spectre" in registry.films()
 
 

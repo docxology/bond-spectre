@@ -34,6 +34,9 @@ keywords:
   - "network geometry"
   - "critical nodes"
   - "cascade coverage"
+  - "traffic interception"
+  - "compromise cascade"
+  - "sensor-placement set cover"
   - "active inference"
 
 metadata:

@@ -83,6 +83,8 @@ def generate_variables(
 
     keywords = ", ".join(str(k) for k in config.get("keywords", []))
     critical = ", ".join(str(c) for c in metrics["critical_nodes"])
+    monitor_allocation = ", ".join(str(a) for a in metrics["monitor_allocation"])
+    set_cover_selection = ", ".join(str(a) for a in metrics["set_cover_selection"])
 
     return {
         "SPECTRE_IDENTITY": "SPECTRE",
@@ -106,6 +108,17 @@ def generate_variables(
         "SPECTRE_ARTICULATION_NODES": ", ".join(articulation_labels),
         "SPECTRE_CRITICAL_NODES": critical,
         "SPECTRE_NUM_OBJECTIVES": str(len(PROVIDER.brief().objectives)),
+        "SPECTRE_TRAFFIC_TOTAL": f"{metrics['traffic_total']:.1f}",
+        "SPECTRE_TRAFFIC_TOP_LINK": str(metrics["traffic_top_link"]),
+        "SPECTRE_MONITOR_ALLOCATION": monitor_allocation,
+        "SPECTRE_MONITOR_COVERAGE": f"{metrics['monitor_coverage_budget3']:.4f}",
+        "SPECTRE_COMPROMISE_FRACTION": f"{metrics['expected_compromise_fraction']:.4f}",
+        "SPECTRE_LEADERSHIP_HIT_RATE": f"{metrics['leadership_hit_rate']:.2f}",
+        "SPECTRE_MEAN_STEPS_TO_LEADERSHIP": f"{metrics['mean_steps_to_leadership']:.2f}",
+        "SPECTRE_SET_COVER_SIZE": str(metrics["set_cover_size"]),
+        "SPECTRE_SET_COVER_SELECTION": set_cover_selection,
+        "SPECTRE_COVER_REDUNDANCY": f"{metrics['coverage_redundancy']:.4f}",
+        "SPECTRE_UNCOVERED_AFTER_COVER": str(metrics["uncovered_targets_after_cover"]),
         "PYTHON_VERSION": platform.python_version(),
         "PLATFORM": f"{platform.system()} {platform.machine()}",
         "GENERATION_TIMESTAMP": datetime.now(timezone.utc).isoformat(timespec="seconds"),

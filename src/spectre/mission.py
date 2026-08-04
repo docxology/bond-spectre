@@ -2,9 +2,10 @@
 
 This is the thin adapter between the pure domain core
 (:mod:`spectre.surveillance_net`, :mod:`spectre.org_intel`,
-:mod:`spectre.network_geometry`) and the FROZEN ``bond_api``
-``MissionProvider`` protocol. The domain modules do **not** import
-``bond_api`` and remain impportable standalone; this module is the only place
+:mod:`spectre.network_geometry`, :mod:`spectre.traffic_intel`,
+:mod:`spectre.infiltration`, :mod:`spectre.signal_cover`) and the FROZEN
+``bond_api`` ``MissionProvider`` protocol. The domain modules do **not** import
+``bond_api`` and remain importable standalone; this module is the only place
 where the protocol contract is wired in.
 
 The provider is deterministic: a fixed seed, no wall-clock in persisted
@@ -34,6 +35,7 @@ from bond_api.protocol import (
 from bond_api.registry import GadgetRegistry
 
 from spectre import __version__
+from spectre.infiltration import expected_damage
 from spectre.network_geometry import (
     articulation_points,
     build_adjacency,
@@ -47,6 +49,12 @@ from spectre.org_intel import (
     compartmentalization,
     hierarchy_stats,
 )
+from spectre.signal_cover import (
+    canonical_coverage_problem,
+    greedy_set_cover,
+    redundancy_index,
+    uncovered_targets,
+)
 from spectre.surveillance_net import (
     SurveillanceNetwork,
     build_network,
@@ -55,6 +63,12 @@ from spectre.surveillance_net import (
     group_centralization,
     herfindahl_index,
     out_degree_centrality,
+)
+from spectre.traffic_intel import (
+    canonical_traffic_network,
+    heavy_hitters,
+    monitor_allocation,
+    total_traffic,
 )
 
 __all__ = [
@@ -213,6 +227,9 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
                 Step(name="flow_survey", action="centralize", params={"objective": brief.objectives[0]}),
                 Step(name="org_intel", action="compartmentalize", params={"objective": brief.objectives[1]}),
                 Step(name="geometry", action="find_critical_nodes", params={"objective": brief.objectives[2]}),
+                Step(name="traffic_intel", action="intercept", params={"objective": brief.objectives[0]}),
+                Step(name="infiltration", action="cascade", params={"objective": brief.objectives[1]}),
+                Step(name="signal_cover", action="place_sensors", params={"objective": brief.objectives[0]}),
             )
         )
 
@@ -238,6 +255,19 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
         efficiency = network_efficiency(geometry_adj)
         critical = critical_node_order(geometry_adj, k=3)
 
+        # Deepened analyses: traffic interception, compromise cascade, sensor cover.
+        traffic = canonical_traffic_network()
+        traffic_total = total_traffic(traffic)
+        top_links = heavy_hitters(traffic, 3)
+        monitor_selected, monitor_coverage = monitor_allocation(traffic, budget=3)
+
+        damage = expected_damage(org, ("Mr White",), turn_probability=0.5, trials=50, seed=_SEED)
+
+        cover = canonical_coverage_problem()
+        cover_selected, cover_covered = greedy_set_cover(cover)
+        cover_redundancy = redundancy_index(cover, cover_selected)
+        cover_gaps = uncovered_targets(cover, cover_selected)
+
         results = {
             "plan_steps": len(plan.steps),
             "centralization_index": round(centrality, 4),
@@ -250,6 +280,17 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
             "articulation_points": [geometry_nodes[i] for i in articulations],
             "network_efficiency": round(efficiency, 4),
             "critical_nodes": [geometry_nodes[i] for i in critical],
+            "traffic_total": round(traffic_total, 1),
+            "traffic_top_link": f"{top_links[0][0]}->{top_links[0][1]} ({top_links[0][2]:.1f})",
+            "monitor_allocation": list(monitor_selected),
+            "monitor_coverage_budget3": round(monitor_coverage, 4),
+            "expected_compromise_fraction": round(damage["mean_fraction"], 4),
+            "leadership_hit_rate": round(damage["leadership_hit_rate"], 4),
+            "mean_steps_to_leadership": round(damage["mean_steps_to_leadership"], 4),
+            "set_cover_size": len(cover_selected),
+            "set_cover_selection": list(cover_selected),
+            "coverage_redundancy": round(cover_redundancy, 4),
+            "uncovered_targets_after_cover": len(cover_gaps),
             "seed": _SEED,
         }
         return MissionOutcome(
@@ -269,11 +310,12 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
         return Debrief(
             outcome=outcome,
             lessons=(
-                f"centralization index {results['centralization_index']}, "
-                f"concentration HHI {results['flow_concentration_hhi']}",
-                f"brotherhood compartmentalization {results['compartmentalization']}, "
-                f"chain complete: {results['chain_complete']}",
-                f"critical nodes carry the network: {', '.join(results['critical_nodes'])}",
+                f"centralization {results['centralization_index']}, "
+                f"monitoring 3 agencies intercepts {results['monitor_coverage_budget3']} of traffic",
+                f"brotherhood compartmentalization {results['compartmentalization']}; "
+                f"a mole reaches leadership with probability {results['leadership_hit_rate']}",
+                f"critical nodes carry the network: {', '.join(results['critical_nodes'])}; "
+                f"set cover needs {results['set_cover_size']} agencies",
             ),
         )
 
@@ -293,6 +335,9 @@ def register_gadgets(registry: GadgetRegistry) -> GadgetRegistry:
             "surveillance_centralization": group_centralization,
             "org_compartmentalization": compartmentalization,
             "geometry_efficiency": network_efficiency,
+            "traffic_interception": monitor_allocation,
+            "infiltration_damage": expected_damage,
+            "signal_set_cover": greedy_set_cover,
         },
     )
     return registry

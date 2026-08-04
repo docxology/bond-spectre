@@ -21,4 +21,12 @@ SPECTRE brotherhood of {{SPECTRE_NUM_OPERATIVES}} operatives across
 Geometry analysis finds {{SPECTRE_NUM_ARTICULATION_POINTS}} articulation points;
 the most load-bearing critical nodes are {{SPECTRE_CRITICAL_NODES}}.
 
+A deepened analysis layer adds three operational models over the same concepts:
+budgeted traffic *interception* (three monitoring agencies capture
+{{SPECTRE_MONITOR_COVERAGE}} of the exchange), *compromise cascades* through
+the brotherhood (a single turned cell operative reaches leadership with
+probability {{SPECTRE_LEADERSHIP_HIT_RATE}}), and *sensor-placement* set cover
+({{SPECTRE_SET_COVER_SIZE}} agencies sweep every target with
+{{SPECTRE_COVER_REDUNDANCY}} multi-sensor redundancy).
+
 *Keywords:* {{SPECTRE_KEYWORDS}}

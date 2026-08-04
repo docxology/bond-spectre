@@ -12,7 +12,7 @@
 
 | Surface | Rule |
 | --- | --- |
-| `src/spectre/surveillance_net.py`, `org_intel.py`, `network_geometry.py` (pure domain core) | `numpy` + stdlib only; **no** `bond_api` import; deterministic; importable standalone |
+| `src/spectre/surveillance_net.py`, `org_intel.py`, `network_geometry.py`, `traffic_intel.py`, `infiltration.py`, `signal_cover.py` (pure domain core) | `numpy` + stdlib only; **no** `bond_api` import; deterministic; importable standalone |
 | `src/spectre/mission.py` | The only module that imports `bond_api`; implements the FROZEN `MissionProvider`. Registered gadgets via `register_gadgets`. |
 | `src/spectre/manuscript_variables.py` | Computes every `{{TOKEN}}` from config + the measured mission results |
 | `src/spectre/figures/` | Matplotlib figure generators (deterministic seed) |
@@ -26,7 +26,7 @@
    protocol or nothing.
 2. **≥90% line+branch coverage on `src/`**:
    `uv run pytest tests/ --cov=src --cov-fail-under=90`.
-3. **Pure core is bond_api-free** — the three domain modules must import only
+3. **Pure core is bond_api-free** — the six domain modules must import only
    `numpy` + stdlib. The protocol adapter lives only in `mission.py`.
 4. **Determinism** — fixed seed, no wall-clock in persisted artifacts, no
    untracked RNG. Re-runs reproduce byte-identical results.

@@ -30,3 +30,30 @@ greedy critical-node ordering identifies
 {{SPECTRE_CRITICAL_NODES}} as the agencies whose neutralization most fragments
 the network. In the film, removing exactly this coordinating hub collapses the
 brotherhood's reach — the model reproduces that dependence quantitatively.
+
+## Traffic interception (deepening)
+
+The canonical exchange carries {{SPECTRE_TRAFFIC_TOTAL}} volume units; the
+single largest flow is {{SPECTRE_TRAFFIC_TOP_LINK}}, confirming the hub's
+dominance. Greedy budgeted monitoring selects {{SPECTRE_MONITOR_ALLOCATION}},
+and monitors {{SPECTRE_MONITOR_COVERAGE}} of all traffic with just three
+agencies — a demonstration of diminishing marginal returns that motivates the
+submodular formulation.
+
+## Compromise cascade (deepening)
+
+Turning a single cell operative causes an expected
+{{SPECTRE_COMPROMISE_FRACTION}} of the brotherhood to fall within the cascade;
+leadership is reached with probability {{SPECTRE_LEADERSHIP_HIT_RATE}} after a
+mean of {{SPECTRE_MEAN_STEPS_TO_LEADERSHIP}} rounds. The model quantifies why a
+compartmentalized brotherhood guards its cells: any cell breach is a vector
+straight to the apex.
+
+## Sensor-placement cover (deepening)
+
+The greedy set cover places {{SPECTRE_SET_COVER_SIZE}} agencies
+({{SPECTRE_SET_COVER_SELECTION}}) to sweep the full target set, leaving
+{{SPECTRE_UNCOVERED_AFTER_COVER}} targets uncovered. The resulting multi-sensor
+redundancy is {{SPECTRE_COVER_REDUNDANCY}} — the fraction of targets swept by at
+least two agencies, i.e. the resilience of the sweep to the loss of a single
+agency.

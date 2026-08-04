@@ -4,7 +4,7 @@
 
 | Layer | Modules | Imports allowed |
 | --- | --- | --- |
-| Pure core | `surveillance_net.py`, `org_intel.py`, `network_geometry.py` | `numpy`, stdlib only — **no** `bond_api`, **no** `infrastructure` |
+| Pure core | `surveillance_net.py`, `org_intel.py`, `network_geometry.py`, `traffic_intel.py`, `infiltration.py`, `signal_cover.py` | `numpy`, stdlib only — **no** `bond_api`, **no** `infrastructure` |
 | Adapter | `mission.py` | `bond_api.*` + the pure core |
 | Hydration | `manuscript_variables.py` | config, `spectre.mission`, pure core |
 | Figures | `figures/networks.py` | `matplotlib`, `numpy`, pure core |
