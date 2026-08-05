@@ -111,7 +111,8 @@ real run — this README states the gate, not a figure that can go stale.
 - [`AGENTS.md`](AGENTS.md) — the package rulebook.
 - [`docs/`](docs/README.md) — architecture, agent instructions, testing philosophy.
 - [`manuscript/`](manuscript/README.md) — the publication surface and token protocol.
-- [`TODO.md`](TODO.md) — build log and remaining work.
+- [`TODO.md`](TODO.md) — open work (correctness, verification, documentation,
+  extension), accepted limitations, and the verification gates.
 - [`data/claim_ledger.yaml`](data/claim_ledger.yaml) — one row per measured manuscript token: recorded value, producing function, artifact path. Reconciled by `tests/test_claim_ledger.py`.
 
 Local-only working tree — this package is part of the BOND suite and is never

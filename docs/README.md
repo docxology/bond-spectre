@@ -17,7 +17,7 @@ Related documents outside this directory:
 
 - [`../AGENTS.md`](../AGENTS.md) — the authoritative package rulebook.
 - [`../README.md`](../README.md) — what the package is and how to run it.
-- [`../TODO.md`](../TODO.md) — build log and remaining work.
+- [`../TODO.md`](../TODO.md) — open work, accepted limitations, verification gates.
 - [`../manuscript/AGENTS.md`](../manuscript/AGENTS.md) — the `{{TOKEN}}` protocol.
 - [`../manuscript/SYNTAX.md`](../manuscript/SYNTAX.md) — citation, figure and token syntax.
 - [`../data/claim_ledger.yaml`](../data/claim_ledger.yaml) — the recorded value of every measured claim.
