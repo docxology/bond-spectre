@@ -11,9 +11,9 @@ uv run python -c "import sys; sys.path.insert(0,'src'); from spectre.manuscript_
 
 | Metric | Value |
 | --- | --- |
-| Test count | 236 |
+| Test count | 246 |
 | Coverage (line+branch on `src/`) | 100.00% |
-| Statements / branches measured | 922 / 356 |
+| Statements / branches measured | 928 / 358 |
 | Domain modules | 6 (infiltration, network_geometry, org_intel, signal_cover, surveillance_net, traffic_intel) |
 | Mission stages | 5 (brief, recon, plan, execute, debrief) |
 | Plan steps | 6 |

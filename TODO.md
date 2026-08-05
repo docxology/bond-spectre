@@ -8,11 +8,29 @@ behind one frozen `bond_api.MissionProvider` adapter in `src/spectre/mission.py`
 with every manuscript number hydrated from the measured `execute()` output and
 reconciled against `data/claim_ledger.yaml`.
 
-**Verified state today** (measured this session, macOS arm64 / CPython 3.14.6):
-`uv run pytest tests/ --cov=src --cov-fail-under=90` → **236 passed**, coverage
-**100.00%** line+branch on `src/` (922 statements, 356 branches, 0 missed).
+**Verified state today** (measured 2026-08-05, macOS arm64 / CPython 3.14.6):
+`uv run pytest tests/ --cov=src --cov-fail-under=90` → **246 passed**, coverage
+**100.00%** line+branch on `src/` (928 statements, 358 branches, 0 missed).
 `ruff check`, `ruff format --check`, and `mypy src/ scripts/` are all clean.
-`git status` is clean at `19f1d4b`.
+
+**Closed 2026-08-05 — the byte-identical claim was false.**
+`manuscript_variables.generate_variables()` emitted `GENERATION_TIMESTAMP` from
+`datetime.now(timezone.utc)` and rendered it into
+`output/manuscript/06_reproducibility.md`, so every regeneration produced
+different persisted bytes while `README.md`, `AGENTS.md` and the manuscript all
+claimed byte-identical regeneration — and 236 green tests never touched it.
+Reproduced before fixing: two consecutive hydrations hashed
+`b5c21873bfd87c06abd20912410b29f0` then `98ef6eb7b315b93c1f1736479ae1ae67`.
+The claim was **made true**, not softened: the token is now
+`SPECTRE_RELEASE_DATE`, read from the committed `paper.date` in
+`manuscript/config.yaml` and validated as `YYYY-MM-DD` with no clock fallback,
+and `tests/test_regeneration_determinism.py` binds it — it regenerates the whole
+artifact set twice, more than a wall-clock tick apart, and compares SHA-256
+digests file by file (proven able to fail: re-introducing `datetime.now()` turns
+5 of its tests red, including all three byte-identity assertions). The claim's
+scope is now stated in words in `manuscript/06_reproducibility.md`: identity
+holds within one software environment, with `{{PLATFORM}}` / `{{PYTHON_VERSION}}`
+the only environment-dependent values.
 
 **Audit position:** all 11 findings in
 `../output/verify/spectre.json` (5 SEVERE, 6 MODERATE) were resolved in phase-6
@@ -42,8 +60,8 @@ today.
 
 | # | Item |
 | --- | --- |
-| V1 | **The byte-identical-determinism claim is not bound by any test.** `README.md:79` states "Two runs of `scripts/debrief.py` produce byte-identical records" and `AGENTS.md:84-86` lists the diff as a *manual* spot-check (verify step 6). The closest test, `tests/test_scripts_smoke.py:51-58`, runs `debrief.py` once and asserts only that the record exists, `success is True`, and `input_hash` is truthy. `tests/test_mission.py:88-92` compares two in-process `execute()` calls but never touches the persisted JSON bytes, so a non-determinism introduced by the serializer (key order, float repr, trailing newline) would ship green. **Done:** a test runs `scripts/debrief.py` twice into a temp location and asserts the two files are byte-identical, and it fails if the writer at `scripts/debrief.py:20-24` drops `sort_keys=True`. **Command:** `uv run pytest tests/test_scripts_smoke.py -q -k determinis` shows the new test passing; then temporarily remove `sort_keys=True` from `scripts/debrief.py:23` and confirm it goes red (positive control), and restore. |
-| V2 | **The same gap applies to figure determinism.** `README.md:76-77` claims a fixed seed for "figure layout". `tests/test_figures.py:24-35` asserts only that the PNG is written and non-empty. Nothing asserts two renders of the same network produce the same bytes, so a matplotlib default or an unseeded jitter change would pass. **Done:** a test renders the canonical network twice to two temp paths and compares SHA-256 digests. **Command:** `uv run pytest tests/test_figures.py -q -k determinis`. |
+| V1 | **The byte-identical-determinism claim is not bound by any test.** `README.md:79` states "Two runs of `scripts/debrief.py` produce byte-identical records" and `AGENTS.md:84-86` lists the diff as a *manual* spot-check (verify step 6). The closest test, `tests/test_scripts_smoke.py:51-58`, runs `debrief.py` once and asserts only that the record exists, `success is True`, and `input_hash` is truthy. `tests/test_mission.py:88-92` compares two in-process `execute()` calls but never touches the persisted JSON bytes, so a non-determinism introduced by the serializer (key order, float repr, trailing newline) would ship green. **Done:** a test runs `scripts/debrief.py` twice into a temp location and asserts the two files are byte-identical, and it fails if the writer at `scripts/debrief.py:20-24` drops `sort_keys=True`. **Command:** `uv run pytest tests/test_scripts_smoke.py -q -k determinis` shows the new test passing; then temporarily remove `sort_keys=True` from `scripts/debrief.py:23` and confirm it goes red (positive control), and restore. **Partly closed 2026-08-05:** `tests/test_regeneration_determinism.py::test_full_pipeline_is_byte_identical_across_runs` runs all three generators twice and compares SHA-256 digests of every `output/` file, so `nine_eyes_debrief.json` is now bound run-to-run. What remains open is the *serializer-canonicality* half: dropping `sort_keys=True` would not make two runs of identical code differ (dict order is insertion order), so that specific positive control still has no gate. A test that asserts the persisted record equals a canonically re-serialized round-trip would close it. |
+| V2 | **The same gap applies to figure determinism.** `README.md:76-77` claims a fixed seed for "figure layout". `tests/test_figures.py:24-35` asserts only that the PNG is written and non-empty. Nothing asserts two renders of the same network produce the same bytes, so a matplotlib default or an unseeded jitter change would pass. **Done:** a test renders the canonical network twice to two temp paths and compares SHA-256 digests. **Closed 2026-08-05:** the PNG is inside the digest set compared by `tests/test_regeneration_determinism.py::test_full_pipeline_is_byte_identical_across_runs`, which re-renders it via `scripts/generate_figures.py` on both passes; an unseeded jitter or a run-varying metadata field now fails the suite. **Command:** `uv run pytest tests/test_regeneration_determinism.py -q`. |
 | V3 | **`tests/test_domain_isolation.py:17-24` hand-maintains the module list it guards.** `_IMPORTS` is a literal 6-tuple. AGENTS.md rule 3 ("the pure core is `bond_api`-free") is only enforced for modules someone remembered to add here — a seventh domain module added tomorrow is silently unguarded, while `manuscript_variables.domain_module_names()` reads the same set off disk and would notice. **Done:** the test derives its import list from `domain_module_names()` (or asserts `set(_IMPORTS)` equals the derived names, so a divergence fails loudly). **Command:** `uv run pytest tests/test_domain_isolation.py -q`, then add an empty `src/spectre/scratch_probe.py`, confirm the suite goes red, and delete it. |
 | V4 | **Two AGENTS.md rules are enforced only by a grep a human has to remember to run.** Rule 1 (no mock framework) is verify step 2 at `AGENTS.md:69`; the lineage rule is verify step 7 at `AGENTS.md:89`. Neither is a test, so neither fires in `uv run pytest`. Every *other* rule in that file has been made a gate (isolation, coverage, claim ledger, live token cross-reference). **Done:** a `tests/test_repo_hygiene.py` scans `tests/` for `MagicMock\|@patch\|create_autospec\|unittest\.mock` and the tree for `template_code_project`, failing on any hit — with a positive control proving the scanner matches a planted string in a temp tree (an empty scan set is the failure mode this class of gate has; see the sibling packages' notes). **Command:** `uv run pytest tests/test_repo_hygiene.py -q` and confirm the scan set is asserted non-empty. |
 
@@ -51,7 +69,7 @@ today.
 
 | # | Item |
 | --- | --- |
-| D1 | **`docs/_generated/COUNTS.md` is regenerated by hand from a real run and can silently age.** Its header tells you which commands to read the numbers off, but nothing fails when the file drifts. Today its rows are accurate (I re-measured: 236 tests, 100.00%, 922/356, 34 ledger rows). The inventory rows *are* pinned live by `tests/test_manuscript_variables.py::TestMeasuredInventories`; the test count, coverage percentage, and statement/branch counts are not. **Done:** either a script regenerates the file from a coverage run, or the header states plainly which rows are gated and which are a hand-recorded snapshot with the date of the run. **Command:** `uv run pytest tests/ --cov=src --cov-fail-under=90 -q \| tail -5` and compare against `docs/_generated/COUNTS.md`. |
+| D1 | **`docs/_generated/COUNTS.md` is regenerated by hand from a real run and can silently age.** Its header tells you which commands to read the numbers off, but nothing fails when the file drifts. Today its rows are accurate (re-measured 2026-08-05: 246 tests, 100.00%, 928/358, 34 ledger rows). The inventory rows *are* pinned live by `tests/test_manuscript_variables.py::TestMeasuredInventories`; the test count, coverage percentage, and statement/branch counts are not. **Done:** either a script regenerates the file from a coverage run, or the header states plainly which rows are gated and which are a hand-recorded snapshot with the date of the run. **Command:** `uv run pytest tests/ --cov=src --cov-fail-under=90 -q \| tail -5` and compare against `docs/_generated/COUNTS.md`. |
 | D2 | **`AGENTS.md:78-82` (verify step 5) still describes ledger reconciliation as a manual eyeball.** It reads "`data/claim_ledger.yaml` values must equal `output/data/manuscript_variables.json`" — but `tests/test_claim_ledger.py` has made that an enforced gate with positive controls since phase-6, and `README.md:91-94` already says so. The rulebook understates its own machinery. **Done:** step 5 names `tests/test_claim_ledger.py` as the enforcement and keeps only the regeneration commands as manual. **Command:** `uv run pytest tests/test_claim_ledger.py -q` (11 tests, all green) and read `AGENTS.md:78-82`. |
 | D3 | **No render has ever been exercised from this package.** `manuscript/config.yaml:53-58` toggles `pdf`, `html`, `slides`, `docx`, and `epub` all to `false`. Sections `00`–`07` + `99`, `preamble.md`, and `references.bib` (15 entries) are render-ready but unproven — and C1 above is exactly the class of defect a first render would have caught. **Done:** one format is toggled on and a build produces a document with no `??` cross-references, no unresolved `{{TOKEN}}`, and the figure visible on the page (raster-read it; `pdftotext` hides mangled figures and math). **Command:** hydrate first (`uv run python scripts/debrief.py && uv run python scripts/generate_figures.py && uv run python scripts/z_generate_manuscript_variables.py`), then run the chosen renderer over `output/manuscript/` and inspect the artifact. |
 
@@ -112,7 +130,7 @@ the sandbox disabled. If you touch `pyproject.toml`, sync with
 `uv sync --all-extras` (a bare `uv sync` prunes pytest).
 
 ```bash
-# 1. Tests + coverage gate — expect 236 passed, 100.00% line+branch on src/
+# 1. Tests + coverage gate — expect 246 passed, 100.00% line+branch on src/
 uv run pytest tests/ --cov=src --cov-fail-under=90
 
 # 2. Zero mocks — expect "Clean"

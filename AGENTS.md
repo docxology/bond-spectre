@@ -29,8 +29,11 @@
 3. **Pure core is bond_api-free** — the six domain modules import only `numpy`
    + stdlib. The protocol adapter lives only in `mission.py`.
 4. **Determinism** — fixed seeds, label-ordered greedy tie-breaks, no wall-clock
-   in persisted artifacts, no untracked RNG. Re-runs reproduce byte-identical
-   results.
+   in *any* persisted artifact (the hydrated manuscript included: the date is
+   the committed `paper.date`, never `datetime.now()`), no untracked RNG.
+   Within one software environment, re-running the three generator scripts
+   reproduces every `output/` file byte-identically;
+   `tests/test_regeneration_determinism.py` is the gate.
 5. **No hardcoded metrics in prose** — every number flows through
    `manuscript_variables.generate_variables()` from the measured mission
    `execute()` output. Never hand-author a metric in `manuscript/*.md`. This

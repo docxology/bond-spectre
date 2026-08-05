@@ -11,11 +11,22 @@ uv run python scripts/z_generate_manuscript_variables.py  # hydrates tokens (run
 ```
 
 Each script recomputes its results from the fixed canonical dataset; there is
-no stored intermediate that could drift from the code. The mission record and
-figure are written under `output/` (git-ignored, regenerable). Running
-`scripts/debrief.py` twice and diffing
-`output/data/nine_eyes_debrief.json` is the determinism check — any difference
-is a defect, not a tolerance.
+no stored intermediate that could drift from the code. The mission record,
+figure and hydrated manuscript are written under `output/` (git-ignored,
+regenerable).
+
+The claim is scoped precisely. **Within one software environment**, two full
+regenerations produce byte-identical `output/` artifacts — mission record,
+figure PNG, `manuscript_variables.json` and every hydrated section — because
+hydration is a pure function of the committed tree: no wall clock, no untracked
+RNG, no run counter. The single environment-dependent value is the interpreter
+stamp printed at the end of this section (`{{PLATFORM}}`, `{{PYTHON_VERSION}}`),
+which by construction is what changes when the environment changes; the
+manuscript's date is `paper.date` from `manuscript/config.yaml`, a committed
+input, not the time of the run. `tests/test_regeneration_determinism.py`
+enforces the claim by regenerating the whole artifact set twice in one test
+run, more than a wall-clock tick apart, and comparing SHA-256 digests file by
+file — a re-introduced `datetime.now()` anywhere in the pipeline turns it red.
 
 ## Provenance
 
@@ -54,5 +65,6 @@ The achieved coverage and test count from the last real run are recorded in
 `docs/_generated/COUNTS.md`; this manuscript deliberately does not restate them,
 because a number quoted in prose is a number that can go stale.
 
-Generated at {{GENERATION_TIMESTAMP}} on {{PLATFORM}} with Python
+Release {{SPECTRE_VERSION}}, dated {{SPECTRE_RELEASE_DATE}} (from
+`manuscript/config.yaml`), hydrated on {{PLATFORM}} with Python
 {{PYTHON_VERSION}}.

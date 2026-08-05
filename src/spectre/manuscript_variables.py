@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import platform
 import re
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -39,6 +38,7 @@ __all__ = [
     "load_claim_ledger",
     "load_manuscript_config",
     "measured_tokens",
+    "release_date",
     "resolve_manuscript_tree",
 ]
 
@@ -65,11 +65,36 @@ ENVIRONMENT_TOKENS = frozenset(
         "SPECTRE_TITLE",
         "SPECTRE_SUBTITLE",
         "SPECTRE_KEYWORDS",
+        "SPECTRE_RELEASE_DATE",
         "PYTHON_VERSION",
         "PLATFORM",
-        "GENERATION_TIMESTAMP",
     }
 )
+
+_RELEASE_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def release_date(config: dict[str, Any]) -> str:
+    """The committed release date from ``manuscript/config.yaml``.
+
+    This is the manuscript's only date, and it is a *committed input*, not a
+    wall clock: hydration must be a pure function of the tree so the
+    byte-identical regeneration claim in ``manuscript/06_reproducibility.md``
+    is true rather than aspirational. A missing or malformed ``paper.date``
+    fails loudly instead of silently falling back to ``datetime.now`` — that
+    fallback is exactly the breach this function exists to prevent.
+
+    Raises:
+        ValueError: If ``paper.date`` is absent, empty, or not ``YYYY-MM-DD``.
+    """
+    paper = config.get("paper", {})
+    value = str(paper.get("date", "")).strip() if isinstance(paper, dict) else ""
+    if not _RELEASE_DATE_RE.match(value):
+        raise ValueError(
+            "manuscript config 'paper.date' must be a committed YYYY-MM-DD date "
+            f"(got {value!r}); hydration never reads the wall clock"
+        )
+    return value
 
 
 def measured_tokens(variables: dict[str, str]) -> dict[str, str]:
@@ -233,9 +258,9 @@ def generate_variables(
         "SPECTRE_SET_COVER_SELECTION": set_cover_selection,
         "SPECTRE_COVER_REDUNDANCY": f"{metrics['coverage_redundancy']:.4f}",
         "SPECTRE_UNCOVERED_AFTER_COVER": str(metrics["uncovered_targets_after_cover"]),
+        "SPECTRE_RELEASE_DATE": release_date(config),
         "PYTHON_VERSION": platform.python_version(),
         "PLATFORM": f"{platform.system()} {platform.machine()}",
-        "GENERATION_TIMESTAMP": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
 

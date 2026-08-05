@@ -75,8 +75,13 @@ failure — re-run with the sandbox disabled.
 
 - **Deterministic**: fixed seeds (cascade activation, compromise trials, figure
   layout), label-ordered tie-breaking in both greedy selections, no wall-clock
-  in persisted artifacts (`Provenance.wall_time_s == 0.0`), canonical SHA-256
-  `input_hash`. Two runs of `scripts/debrief.py` produce byte-identical records.
+  in any persisted artifact — mission record (`Provenance.wall_time_s == 0.0`)
+  *and* hydrated manuscript, whose date is the committed `paper.date` rather
+  than `datetime.now()` — plus a canonical SHA-256 `input_hash`. Within one
+  software environment, two runs of the three generator scripts produce a
+  byte-identical `output/` tree; `tests/test_regeneration_determinism.py`
+  regenerates it twice, more than a wall-clock tick apart, and compares digests
+  file by file.
 - **Zero mocks**: all tests use real data structures and real computation. Where
   a test needs an alternative implementation it writes a real object satisfying
   the real protocol.

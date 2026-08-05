@@ -56,9 +56,14 @@ before the fleet does.
    per-trial seeds as `seed + i`. `figures/networks.py` has its own layout
    seed. A seed recorded in `Provenance` that no computation reads is a false
    provenance claim — `tests/test_mission.py` asserts the causal link.
-2. No wall-clock in persisted artifacts: `Provenance.wall_time_s` is `0.0` by
-   construction. `GENERATION_TIMESTAMP` exists only in the hydrated manuscript,
-   never in the mission record.
+2. No wall-clock in persisted artifacts, *including the hydrated manuscript*:
+   `Provenance.wall_time_s` is `0.0` by construction, and
+   `manuscript_variables.generate_variables()` never calls `datetime.now()` —
+   the manuscript's date is `paper.date` from `manuscript/config.yaml`, a
+   committed input. Until 2026-08-05 a `GENERATION_TIMESTAMP` token did read
+   the wall clock into `output/manuscript/06_reproducibility.md`, which made
+   the byte-identical claim false while every test stayed green; the binding
+   gate is now `tests/test_regeneration_determinism.py`.
 3. Iteration over sets is sorted before it can affect a result (see the
    cascade's `sorted(compromised)` and the greedy tie-breaks).
 4. Re-running `scripts/debrief.py` twice must produce byte-identical

@@ -59,8 +59,8 @@ text.
 
 | Token | Source |
 | --- | --- |
-| `{{PYTHON_VERSION}}`, `{{PLATFORM}}` | `platform` module at hydration time |
-| `{{GENERATION_TIMESTAMP}}` | UTC ISO-8601 at hydration time — the *only* wall-clock value anywhere in the artifacts, and it never enters the mission record |
+| `{{PYTHON_VERSION}}`, `{{PLATFORM}}` | `platform` module at hydration time — the only environment-dependent values in the artifact set |
+| `{{SPECTRE_RELEASE_DATE}}` | `paper.date` in `manuscript/config.yaml` — a committed input, validated as `YYYY-MM-DD`. There is **no** wall-clock value anywhere in the artifacts: hydration never calls `datetime.now()`, which is what makes the byte-identical regeneration claim true |
 
 ## Citations
 
