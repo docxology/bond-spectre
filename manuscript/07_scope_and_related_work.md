@@ -19,7 +19,11 @@ exactly three things, each verifiable by running the code:
 It claims nothing about any real surveillance arrangement. The canonical
 network is a fictional construction sized to the film's conceit
 ({{SPECTRE_NUM_NODES}} agencies, {{SPECTRE_NUM_EDGES}} directed links), chosen
-so that each algorithm has something non-trivial to find.
+so that each algorithm has something non-trivial to find. The brotherhood
+roster is one node per distinct film character, but its cell partition and
+command edges are chosen rather than observed (§5): the organisational
+*structure* is a modelling construct, and no claim of canonical fidelity is
+made for it.
 
 ## Out of scope
 
@@ -45,7 +49,11 @@ connectivity, and efficiency measures follows Newman [@Newman2010]. Betweenness
 is computed with Brandes' shortest-path accumulation [@Brandes2001]. Flow
 concentration reuses the Herfindahl–Hirschman index from industrial
 organization [@Hirschman1964] on the inflow-share vector, which gives a
-concentration reading independent of the Freeman index.
+concentration reading independent of the Freeman index — and, on this dataset,
+a contradicting one (§3). Because the index is bounded below by `1/r` rather
+than by 0, it is reported alongside that floor; quoting an HHI without its
+floor invites reading an evenly-spread vector as a concentrated one, which is
+exactly what an earlier revision of this report did.
 
 **Connectivity geometry.** Articulation points come from Tarjan's low-link
 depth-first search [@Tarjan1972; @HopcroftTarjan1973]. Global efficiency is the
@@ -101,6 +109,11 @@ NINE EYES it obtains through those interfaces.
   the activation and turn probabilities, which are stated design choices rather
   than estimates. The models are used comparatively (which node, which agency,
   how much worse) rather than as absolute forecasts.
+- **Cascade sampling error.** Both cascade figures are means over
+  {{SPECTRE_CASCADE_TRIALS}} seeded realizations, not closed-form
+  expectations. No confidence interval is reported, so the trailing digits of
+  those two numbers should not be read as significant; they would move under a
+  different base seed or trial count.
 - **Unweighted geometry.** Treating the sharing graph as unweighted for the
   connectivity layer discards the volume information the traffic layer uses. The
   two layers deliberately answer different questions and their results should

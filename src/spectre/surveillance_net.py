@@ -5,13 +5,15 @@ global surveillance network: intelligence agencies as nodes, data-sharing
 links as directed edges. This module models the programme's geometric core:
 
 * **data flow** — directed adjacency over agencies, in/out degree centrality;
-* **centralization** — Freeman group centralization and Herfindahl-style
-  concentration of data shares through hub agencies;
+* **centralization** — Freeman group centralization and the Herfindahl
+  concentration of the inflow-share vector, read against its even-spread
+  floor (:func:`uniform_share_index`) so the index is interpretable;
 * **betweenness** — which agencies sit on the shortest data paths that carry
   the network's traffic (Brandes, unweighted);
-* **cascade coverage** — the deterministic influence cascade that measures how
-  far a signal from a source propagates through sharing links (surveillance
-  reach);
+* **cascade coverage** — an explicitly seeded Bernoulli influence cascade
+  measuring how far a signal from a source propagates through sharing links,
+  as one realization (:func:`cascade_coverage`) or as a trial-averaged
+  expectation (:func:`expected_cascade_coverage`);
 * **sweep coverage** — the fraction of a target population swept by at least
   one agency's signals.
 
@@ -39,7 +41,9 @@ __all__ = [
     "betweenness_centrality",
     "herfindahl_index",
     "data_share_centrality",
+    "uniform_share_index",
     "cascade_coverage",
+    "expected_cascade_coverage",
     "sweep_coverage",
 ]
 
@@ -292,33 +296,68 @@ def herfindahl_index(values: Sequence[float]) -> float:
 
 
 def data_share_centrality(network: SurveillanceNetwork) -> CentralityResult:
-    """Column-normalized inflow share: each agency's share of all observed flows."""
-    adj = network.adjacency.astype(np.float64)
-    totals = adj.sum(axis=0)
-    safe = np.where(totals > 0, totals, 1.0)
-    shares = (adj / safe).sum(axis=0)
+    """Each agency's share of all inbound data flows.
+
+    ``share_j = inflow_j / sum_k inflow_k``, where ``inflow_j`` is agency
+    ``j``'s in-degree. The scores are a probability vector: they sum to 1 on
+    any network carrying at least one edge, and an agency that receives
+    nothing scores 0. An edgeless network has no flow to share, so every score
+    is 0 (and the vector sums to 0, not 1).
+
+    This is the vector :func:`herfindahl_index` is meant to consume; feeding it
+    anything that is not normalized to a total of 1 makes the resulting index
+    meaningless.
+    """
+    inflow = network.adjacency.astype(np.float64).sum(axis=0)
+    total = float(inflow.sum())
+    shares = inflow / total if total > 0 else np.zeros_like(inflow)
     scores = _score_map(network, list(shares))
     return CentralityResult(scores=scores, top=_ordered(scores))
+
+
+def uniform_share_index(network: SurveillanceNetwork) -> float:
+    """The Herfindahl floor for this network's inflow-share vector.
+
+    The HHI of a share vector spread as evenly as possible over the agencies
+    that receive *anything* is ``1 / r``, where ``r`` is the number of agencies
+    with non-zero in-degree. Reporting a measured HHI without this floor is
+    uninterpretable: an index of 0.14 on nine agencies sounds concentrated
+    until you know the floor is 0.125.
+
+    Raises:
+        ValueError: If no agency receives any flow (the floor is undefined).
+    """
+    inflow = network.adjacency.sum(axis=0)
+    receiving = int(np.count_nonzero(inflow))
+    if receiving == 0:
+        raise ValueError("no agency receives flow — the even-spread floor is undefined")
+    return 1.0 / receiving
 
 
 def cascade_coverage(
     network: SurveillanceNetwork,
     sources: Iterable[str],
     activation_prob: float,
+    *,
+    seed: int = 0,
 ) -> CascadeResult:
-    """Deterministic influence-cascade reach from a set of seeding agencies.
+    """One seeded realization of an influence cascade from a set of agencies.
 
     A seeded agency activates; each *active* agency then attempts to activate
     each downstream neighbour, and a neighbour activates with an independent
-    Bernoulli draw at exactly ``activation_prob`` (seeded through a fixed
-    numpy default_rng so the run is reproducible). The result reports the
-    fraction of the network reached — the surveillance footprint of the seeded
-    agencies.
+    Bernoulli draw at exactly ``activation_prob``, drawn from
+    ``numpy.random.default_rng(seed)``.
+
+    This returns a **single Bernoulli realization**, not an expectation: with
+    ``0 < activation_prob < 1`` the coverage fraction of one draw can sit far
+    from the mean. Use :func:`expected_cascade_coverage` when the quantity of
+    interest is the expected reach.
 
     Args:
         network: The surveillance network.
         sources: Agencies seeded with the signal.
         activation_prob: Probability ``(0, 1]`` that an edge transmits a signal.
+        seed: RNG seed governing every activation draw in this realization.
 
     Raises:
         ValueError: If ``activation_prob`` is outside ``(0, 1]``, sources are
@@ -333,7 +372,7 @@ def cascade_coverage(
         raise ValueError("at least one source agency is required")
     index = network.nodes  # tuple of labels
     label_to_i = {label: i for i, label in enumerate(index)}
-    rng = np.random.default_rng(0)  # fixed seed -> deterministic cascade
+    rng = np.random.default_rng(seed)
     for label in requested:
         if label not in label_to_i:
             raise ValueError(f"unknown source agency {label!r}")
@@ -355,6 +394,41 @@ def cascade_coverage(
         activated=reached,
         coverage_fraction=len(activated) / network.n,
     )
+
+
+def expected_cascade_coverage(
+    network: SurveillanceNetwork,
+    sources: Iterable[str],
+    activation_prob: float,
+    *,
+    trials: int,
+    seed: int = 0,
+) -> float:
+    """Mean cascade coverage over ``trials`` independently seeded realizations.
+
+    :func:`cascade_coverage` is a single Bernoulli draw; this averages
+    ``trials`` of them with per-trial seeds derived as ``seed + i`` (the same
+    derivation :func:`spectre.infiltration.expected_damage` uses), so the
+    reported reach is an estimate of the expectation rather than one sample.
+
+    Args:
+        network: The surveillance network.
+        sources: Agencies seeded with the signal.
+        activation_prob: Probability ``(0, 1]`` that an edge transmits a signal.
+        trials: Number of realizations to average; must be positive.
+        seed: Base seed; trial ``i`` runs at ``seed + i``.
+
+    Raises:
+        ValueError: If ``trials`` is not positive, or on any error
+            :func:`cascade_coverage` raises.
+    """
+    if trials <= 0:
+        raise ValueError("trials must be positive")
+    requested = tuple(sources)
+    total = 0.0
+    for i in range(trials):
+        total += cascade_coverage(network, requested, activation_prob, seed=seed + i).coverage_fraction
+    return total / trials
 
 
 def sweep_coverage(captured: int, total: int) -> float:

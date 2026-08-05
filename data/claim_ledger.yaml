@@ -1,78 +1,281 @@
+# Claim ledger — one row per measured manuscript token.
+#
+# Coverage is enforced, not asserted: tests/test_claim_ledger.py compares this
+# file against measured_tokens(generate_variables()) and fails if a measured
+# token has no row, a row names a token that is no longer measured, or a
+# recorded value differs from the value the code now produces. Values are the
+# exact rendered token strings, so a formatting change is drift too.
+
 claims:
-  - claim_id: nine-eyes-centralization-index
-    kind: number
-    value: 0.9219
-    source: src/spectre/mission.py execute() measured group_centralization (canonical network)
+  - claim_id: articulation-nodes
+    token: SPECTRE_ARTICULATION_NODES
+    kind: text
+    value: "US"
+    source: "spectre.network_geometry.articulation_points labels"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-flow-concentration-hhi
+  - claim_id: cascade-coverage
+    token: SPECTRE_CASCADE_COVERAGE
     kind: number
-    value: 0.125
-    source: src/spectre/mission.py execute() herfindahl_index over inflow shares
+    value: "0.7556"
+    source: "spectre.surveillance_net.expected_cascade_coverage(('US',), 0.6, trials=50, seed=11)"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-cascade-coverage
-    kind: number
-    value: 0.4444
-    source: src/spectre/mission.py cascade_coverage(("US",), 0.6) fixed-seed deterministic
+  - claim_id: cascade-trials
+    token: SPECTRE_CASCADE_TRIALS
+    kind: integer
+    value: "50"
+    source: "spectre.mission._CASCADE_TRIALS"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: spectre-compartmentalization
+  - claim_id: centralization-index
+    token: SPECTRE_CENTRALIZATION_INDEX
     kind: number
-    value: 0.7407
-    source: src/spectre/mission.py org_intel.compartmentalization (canonical brotherhood)
+    value: "0.9219"
+    source: "spectre.surveillance_net.group_centralization(out-degree, maximum_score=n-1)"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-network-efficiency
-    kind: number
-    value: 0.6806
-    source: src/spectre/mission.py network_geometry.network_efficiency (undirected)
+  - claim_id: chain-complete
+    token: SPECTRE_CHAIN_COMPLETE
+    kind: boolean
+    value: "true"
+    source: "spectre.org_intel.hierarchy_stats().chain_complete"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-traffic-total
+  - claim_id: compartmentalization
+    token: SPECTRE_COMPARTMENTALIZATION
     kind: number
-    value: 1360.0
-    source: src/spectre/mission.py traffic_intel.total_traffic (canonical)
+    value: "0.8235"
+    source: "spectre.org_intel.compartmentalization (canonical brotherhood)"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-monitor-coverage-budget3
+  - claim_id: compromise-fraction
+    token: SPECTRE_COMPROMISE_FRACTION
     kind: number
-    value: 0.9669
-    source: src/spectre/mission.py traffic_intel.monitor_allocation (budget 3)
+    value: "0.4771"
+    source: "spectre.infiltration.expected_damage(Mr White, p=0.5, trials=50, seed=11) mean_fraction"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: spectre-expected-compromise-fraction
+  - claim_id: cover-redundancy
+    token: SPECTRE_COVER_REDUNDANCY
     kind: number
-    value: 0.8067
-    source: src/spectre/mission.py infiltration.expected_damage (Mr White, p=0.5, 50 trials)
+    value: "0.2500"
+    source: "spectre.signal_cover.redundancy_index (greedy cover)"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: spectre-leadership-hit-rate
-    kind: number
-    value: 0.86
-    source: src/spectre/mission.py infiltration.expected_damage leadership_hit_rate
+  - claim_id: critical-nodes
+    token: SPECTRE_CRITICAL_NODES
+    kind: text
+    value: "US, FR, UK"
+    source: "spectre.network_geometry.critical_node_order(k=3)"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-set-cover-size
-    kind: number
-    value: 4
-    source: src/spectre/mission.py signal_cover.greedy_set_cover (canonical)
+  - claim_id: domain-modules
+    token: SPECTRE_DOMAIN_MODULES
+    kind: text
+    value: "infiltration, network_geometry, org_intel, signal_cover, surveillance_net, traffic_intel"
+    source: "spectre.manuscript_variables.domain_module_names()"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json
-  - claim_id: nine-eyes-cover-redundancy
+  - claim_id: flow-concentration-floor
+    token: SPECTRE_FLOW_CONCENTRATION_FLOOR
     kind: number
-    value: 0.25
-    source: src/spectre/mission.py signal_cover.redundancy_index (greedy cover)
+    value: "0.1250"
+    source: "spectre.surveillance_net.uniform_share_index (1 / receiving agencies)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: flow-concentration-hhi
+    token: SPECTRE_FLOW_CONCENTRATION_HHI
+    kind: number
+    value: "0.1361"
+    source: "spectre.surveillance_net.herfindahl_index(data_share_centrality inflow shares)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: hierarchy-height
+    token: SPECTRE_HIERARCHY_HEIGHT
+    kind: integer
+    value: "2"
+    source: "spectre.org_intel.hierarchy_stats().height"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: leadership-hit-rate
+    token: SPECTRE_LEADERSHIP_HIT_RATE
+    kind: number
+    value: "0.58"
+    source: "spectre.infiltration.expected_damage(...) leadership_hit_rate"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: mean-steps-to-leadership
+    token: SPECTRE_MEAN_STEPS_TO_LEADERSHIP
+    kind: number
+    value: "1.17"
+    source: "spectre.infiltration.expected_damage(...) mean_steps_to_leadership"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: monitor-allocation
+    token: SPECTRE_MONITOR_ALLOCATION
+    kind: text
+    value: "US, DE, ES"
+    source: "spectre.traffic_intel.monitor_allocation(budget=3) selection"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: monitor-budget
+    token: SPECTRE_MONITOR_BUDGET
+    kind: integer
+    value: "3"
+    source: "len(monitor_allocation selection)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: monitor-coverage
+    token: SPECTRE_MONITOR_COVERAGE
+    kind: number
+    value: "0.9669"
+    source: "spectre.traffic_intel.monitor_allocation(budget=3) coverage"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: network-efficiency
+    token: SPECTRE_NETWORK_EFFICIENCY
+    kind: number
+    value: "0.6806"
+    source: "spectre.network_geometry.network_efficiency (undirected adjacency)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-articulation-points
+    token: SPECTRE_NUM_ARTICULATION_POINTS
+    kind: integer
+    value: "1"
+    source: "len(spectre.network_geometry.articulation_points)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-cells
+    token: SPECTRE_NUM_CELLS
+    kind: integer
+    value: "3"
+    source: "spectre.org_intel.cell_membership (execute -> cell_count)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-domain-modules
+    token: SPECTRE_NUM_DOMAIN_MODULES
+    kind: integer
+    value: "6"
+    source: "len(spectre.manuscript_variables.domain_module_names())"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-edges
+    token: SPECTRE_NUM_EDGES
+    kind: integer
+    value: "13"
+    source: "len(spectre.mission.NINE_EYES_EDGES)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-gadgets
+    token: SPECTRE_NUM_GADGETS
+    kind: integer
+    value: "6"
+    source: "len(spectre.mission.gadget_names())"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-nodes
+    token: SPECTRE_NUM_NODES
+    kind: integer
+    value: "9"
+    source: "len(spectre.mission.NINE_EYES_NODES)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-objectives
+    token: SPECTRE_NUM_OBJECTIVES
+    kind: integer
+    value: "3"
+    source: "len(spectre.mission.PROVIDER.brief().objectives)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-operatives
+    token: SPECTRE_NUM_OPERATIVES
+    kind: integer
+    value: "7"
+    source: "len(spectre.mission.SPECTRE_OPERATIVES)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: num-receiving-agencies
+    token: SPECTRE_NUM_RECEIVING_AGENCIES
+    kind: integer
+    value: "8"
+    source: "spectre.mission execute(): agencies with non-zero in-degree"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: plan-steps
+    token: SPECTRE_PLAN_STEPS
+    kind: integer
+    value: "6"
+    source: "len(spectre.mission.PROVIDER.plan(brief).steps)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: set-cover-selection
+    token: SPECTRE_SET_COVER_SELECTION
+    kind: text
+    value: "CA, DE, FR, UK"
+    source: "spectre.signal_cover.greedy_set_cover selection"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: set-cover-size
+    token: SPECTRE_SET_COVER_SIZE
+    kind: integer
+    value: "4"
+    source: "len(spectre.signal_cover.greedy_set_cover selection)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: traffic-top-link
+    token: SPECTRE_TRAFFIC_TOP_LINK
+    kind: text
+    value: "US->UK (200.0)"
+    source: "spectre.traffic_intel.heavy_hitters(3)[0]"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: traffic-total
+    token: SPECTRE_TRAFFIC_TOTAL
+    kind: number
+    value: "1360.0"
+    source: "spectre.traffic_intel.total_traffic (canonical exchange)"
+    source_tier: generated_metric
+    freshness: active
+    artifact_path: output/data/manuscript_variables.json
+  - claim_id: uncovered-after-cover
+    token: SPECTRE_UNCOVERED_AFTER_COVER
+    kind: integer
+    value: "0"
+    source: "len(spectre.signal_cover.uncovered_targets(greedy cover))"
     source_tier: generated_metric
     freshness: active
     artifact_path: output/data/manuscript_variables.json

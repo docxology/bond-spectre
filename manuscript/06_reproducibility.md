@@ -23,9 +23,14 @@ Execution provenance records the package version, the deterministic seed, and
 the SHA-256 ``input_hash`` of the mission inputs — a canonical, key-sorted JSON
 serialization of the agency network and the brotherhood — so any outcome can be
 reproduced solely from its persisted record. `data/claim_ledger.yaml` carries
-the current value of every measured claim alongside the function that produced
-it, and is reconciled against `output/data/manuscript_variables.json` whenever
-a metric changes.
+one row per measured manuscript token — the recorded value alongside the
+function that produced it — and that coverage is enforced rather than asserted:
+`tests/test_claim_ledger.py` compares the ledger against
+`measured_tokens(generate_variables())` and fails on a measured token with no
+row, a row for a token that is no longer measured, or a recorded value the code
+no longer produces. The token partition is an exclusion list (only
+configuration prose and the environment stamp are exempt), so a newly added
+metric is covered automatically and exempting one takes a deliberate edit.
 
 ## No hand-authored numbers
 

@@ -32,18 +32,75 @@ from spectre.mission import (
 from spectre.network_geometry import build_adjacency, articulation_points
 
 __all__ = [
+    "ENVIRONMENT_TOKENS",
     "MissionRunner",
     "domain_module_names",
     "generate_variables",
+    "load_claim_ledger",
     "load_manuscript_config",
+    "measured_tokens",
     "resolve_manuscript_tree",
 ]
 
 # .../spectre/src/spectre/manuscript_variables.py -> parents[2] == project root
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PACKAGE_ROOT / "manuscript" / "config.yaml"
+DEFAULT_LEDGER_PATH = PACKAGE_ROOT / "data" / "claim_ledger.yaml"
 
 _TOKEN_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
+
+#: Tokens that carry no measured quantity — configuration prose and the
+#: environment stamp. Everything :func:`generate_variables` emits that is
+#: *not* listed here is a measured claim and must have a row in
+#: ``data/claim_ledger.yaml``.
+#:
+#: The partition is deliberately expressed as an exclusion list rather than an
+#: inclusion list: a newly added measured token is covered by the ledger gate
+#: automatically, and exempting one requires editing this constant on purpose.
+ENVIRONMENT_TOKENS = frozenset(
+    {
+        "SPECTRE_IDENTITY",
+        "SPECTRE_CODENAME",
+        "SPECTRE_VERSION",
+        "SPECTRE_TITLE",
+        "SPECTRE_SUBTITLE",
+        "SPECTRE_KEYWORDS",
+        "PYTHON_VERSION",
+        "PLATFORM",
+        "GENERATION_TIMESTAMP",
+    }
+)
+
+
+def measured_tokens(variables: dict[str, str]) -> dict[str, str]:
+    """The measured subset of a token mapping (everything not environmental)."""
+    return {token: value for token, value in variables.items() if token not in ENVIRONMENT_TOKENS}
+
+
+def load_claim_ledger(ledger_path: str | Path | None = None) -> dict[str, dict[str, Any]]:
+    """Load ``data/claim_ledger.yaml`` as ``token -> row``.
+
+    Raises:
+        FileNotFoundError: If the ledger file is missing.
+        ValueError: If the ledger is not a mapping with a ``claims`` list, a
+            row lacks a ``token``, or two rows claim the same token.
+    """
+    path = Path(ledger_path) if ledger_path is not None else DEFAULT_LEDGER_PATH
+    if not path.is_file():
+        raise FileNotFoundError(f"claim ledger not found: {path}")
+    with path.open("r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle)
+    if not isinstance(data, dict) or not isinstance(data.get("claims"), list):
+        raise ValueError(f"claim ledger must be a mapping with a 'claims' list: {path}")
+    rows: dict[str, dict[str, Any]] = {}
+    for row in data["claims"]:
+        token = row.get("token")
+        if not token:
+            raise ValueError(f"claim ledger row without a 'token': {row}")
+        if token in rows:
+            raise ValueError(f"claim ledger has two rows for token {token}")
+        rows[token] = row
+    return rows
 
 
 def load_manuscript_config(config_path: str | Path | None = None) -> dict[str, Any]:
@@ -148,7 +205,10 @@ def generate_variables(
         "SPECTRE_NUM_CELLS": str(metrics["cell_count"]),
         "SPECTRE_CENTRALIZATION_INDEX": f"{metrics['centralization_index']:.4f}",
         "SPECTRE_FLOW_CONCENTRATION_HHI": f"{metrics['flow_concentration_hhi']:.4f}",
+        "SPECTRE_FLOW_CONCENTRATION_FLOOR": f"{metrics['flow_concentration_floor']:.4f}",
+        "SPECTRE_NUM_RECEIVING_AGENCIES": str(metrics["receiving_agencies"]),
         "SPECTRE_CASCADE_COVERAGE": f"{metrics['cascade_coverage']:.4f}",
+        "SPECTRE_CASCADE_TRIALS": str(metrics["cascade_trials"]),
         "SPECTRE_HIERARCHY_HEIGHT": str(metrics["hierarchy_height"]),
         "SPECTRE_CHAIN_COMPLETE": str(metrics["chain_complete"]).lower(),
         "SPECTRE_COMPARTMENTALIZATION": f"{metrics['compartmentalization']:.4f}",

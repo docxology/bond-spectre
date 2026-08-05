@@ -29,13 +29,35 @@ that can be derived on paper:
 - a two-agency traffic split of 30/70 makes the interception coverage of each
   monitored endpoint exact.
 
-Tests that only assert "a float came back" do not earn their place here.
+Tests that only assert "a float came back" do not earn their place here — and
+neither do the weaker relatives of that assertion, which are what actually let a
+broken metric survive a 100%-covered suite:
+
+- **`float(x) > 0.0` on a quantity that cannot be non-positive.** `herfindahl_index`
+  raises on a zero total, so asserting its output is positive is unfalsifiable.
+- **Key-set assertions on a value-returning function.** `set(result.scores) ==
+  set(NODES)` holds for shares, indicators and zeros alike.
+- **Comparing a token to the expression that generates it.** If the token is
+  `str(len(gadget_names()))`, then `int(token) == len(gadget_names())` is `x == x`.
+  Pin inventories to literals; the literal is the independent side.
+
+The standard is a value re-derived independently — recomputed in the test from the
+raw input rather than by calling the function under test. `TestHeadlineValuesArePinned`
+in `test_mission.py` rebuilds the in-degree and out-degree distributions from
+`NINE_EYES_EDGES` with a `Counter` and asserts the provider's numbers against
+closed forms (`23/169`, `59/64`).
 
 ## Determinism as a tested property, not a claim
 
-- `cascade_coverage` runs on a fixed seed; the tests assert the same seeded
-  cascade reproduces its reached set and that coverage is monotone in the
-  activation probability.
+- `cascade_coverage` takes an explicit `seed`; the tests assert the same seed
+  reproduces its reached set, that coverage is monotone in the activation
+  probability, and — the part that matters — that *different* seeds produce
+  different realizations. A seed argument that is accepted and ignored passes
+  every reproducibility test ever written, so reproducibility is asserted
+  together with sensitivity.
+- `expected_cascade_coverage` is asserted to differ from a single draw at the
+  same seed, so the headline cascade number cannot silently revert to one
+  Bernoulli sample.
 - `simulate_compromise` / `expected_damage` take an explicit seed and derive
   per-trial seeds; the tests assert repeat runs are identical.
 - Greedy tie-breaks are asserted directly: `test_ties_break_by_agency_label_not_node_order`
@@ -87,17 +109,18 @@ you cannot make it fire, the guard is decoration — remove it.
 
 | File | Covers |
 | --- | --- |
-| `test_surveillance_net.py` | edge-list and matrix constructors, degree/betweenness/share centrality, Freeman centralization, HHI, seeded cascade (incl. generator sources), sweep coverage, degenerate 1- and 2-node networks, all error branches |
+| `test_surveillance_net.py` | edge-list and matrix constructors, degree/betweenness centrality, Freeman centralization, HHI and its even-spread floor, **inflow shares pinned to exact fractions** (they were once asserted only by key set, which let a 0/1 indicator ship), seeded cascade incl. seed *sensitivity* and generator sources, trial-averaged expected coverage, sweep coverage, degenerate 1- and 2-node networks, all error branches |
 | `test_org_intel.py` | build validation (unknown operative, unknown superior, self-report), depth/height, apex reachability, cell membership, compartmentalization, exposure, command cycles, explicit `None` parents |
 | `test_network_geometry.py` | components, connectivity, articulation points, all-pairs distances, efficiency on connected/disconnected/isolated graphs, removal impact, robustness curve, greedy critical ordering, error branches |
 | `test_traffic_intel.py` | traffic build/validation, totals, heavy hitters, interception on out- and in-links, budgeted greedy allocation, label-ordered tie-breaks, error branches |
 | `test_infiltration.py` | cascade spread and determinism, damage aggregation, leadership-hit accounting, seed/probability/trials validation |
 | `test_signal_cover.py` | coverage build/validation, greedy set cover incl. tie-breaks and zero-gain termination, counts, uncovered gaps, redundancy |
-| `test_mission.py` | frozen protocol compliance, five-stage flow, six-step plan, measured results, provenance, gadget registration, live discovery |
+| `test_mission.py` | frozen protocol compliance, five-stage flow, six-step plan, **exact pins on every headline metric re-derived from the edge list**, proof the recorded seed governs the cascade, distinct-person roster assertions, provenance, gadget registration, live discovery |
 | `test_manuscript_variables.py` | config loading and validation, token map, measured inventories, strict metrics gate via a real stand-in runner, live `{{TOKEN}}` cross-reference, tree resolution |
-| `test_figures.py` | figure PNG writing + empty-network error |
+| `test_figures.py` | figure PNG writing, empty-network error, and the title gate: the figure sizes nodes by betweenness, so its title must name the betweenness leader *and* the largest sender rather than calling either one "the hub" |
 | `test_scripts_smoke.py` | subprocess execution of every CLI with artifact assertions |
 | `test_domain_isolation.py` | subprocess proof that the six pure modules import without `bond_api` |
+| `test_claim_ledger.py` | `data/claim_ledger.yaml` reconciliation: one row per measured token, values equal to the measured values, loader error branches, plus positive controls that perturb and drop a row to prove the comparison is live |
 
 ## The live cross-reference gate
 

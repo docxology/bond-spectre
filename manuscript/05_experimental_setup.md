@@ -9,7 +9,19 @@ The analysis runs over a fixed canonical dataset declared in
   (``UK, US, CA, AU, NZ, DE, FR, ES, SE``) with {{SPECTRE_NUM_EDGES}} directed
   data-sharing links, the United States at the hub;
 * **SPECTRE brotherhood** — {{SPECTRE_NUM_OPERATIVES}} operatives across
-  {{SPECTRE_NUM_CELLS}} cells, an apex leader, and one executive layer;
+  {{SPECTRE_NUM_CELLS}} cells, an apex leader, and one executive layer. The
+  roster is a *distinct-person* roster: exactly one node per film character.
+  An earlier revision of this dataset carried "Franz Oberhauser" (Blofeld's
+  birth name — the same character) and both "Hinx" and "Bautista" (Mr Hinx
+  again, the latter under his actor's surname) as separate operatives, which
+  inflated the operative count and manufactured the executive layer that the
+  hierarchy height then reported. Those aliases are gone;
+* **Brotherhood edges are a modelling construct.** The film establishes
+  Blofeld at the apex, Mr Hinx as an enforcer, Mr White as a former member,
+  Madeleine Swann as his daughter and C as an inside collaborator, but it
+  publishes no org chart. The cell assignment and the `superior → subordinate`
+  edges are therefore chosen, not observed; the only fidelity claim made is
+  that no two nodes are the same person;
 * **Traffic scenario** — the same agency set carrying volume-weighted links
   (`spectre.traffic_intel.canonical_traffic_network`), sized so that no single
   agency observes the whole exchange and the interception problem is
@@ -25,10 +37,11 @@ own modules and are fixed constants of those modules.
 
 ## Determinism
 
-* Fixed RNG seed for the influence-cascade activation draws (inside
-  `spectre.surveillance_net.cascade_coverage`);
-* explicit base seed for the compromise cascade, with per-trial seeds derived
-  as `seed + i` (inside `spectre.infiltration.expected_damage`);
+* One base seed, `_SEED` in `spectre.mission`, governs both cascades: it is
+  passed to `spectre.surveillance_net.expected_cascade_coverage` and to
+  `spectre.infiltration.expected_damage`, and each derives per-trial seeds as
+  `seed + i`. The seed recorded in `Provenance` is therefore the seed the
+  reported numbers were produced under — changing it changes them;
 * fixed layout seed in the figure generator;
 * deterministic tie-breaking by label in both greedy selections, so the results
   do not depend on input ordering;

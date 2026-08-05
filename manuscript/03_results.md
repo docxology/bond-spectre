@@ -9,17 +9,31 @@ which they were measured.
 
 The NINE EYES network comprises {{SPECTRE_NUM_NODES}} agencies and
 {{SPECTRE_NUM_EDGES}} directed data-sharing links. The measured group
-centralization index is {{SPECTRE_CENTRALIZATION_INDEX}}, indicating that the
-flows concentrate strongly around a hub agency; the independent Herfindahl
-flow-concentration measure is {{SPECTRE_FLOW_CONCENTRATION_HHI}}. A signal
-seeded at the hub propagates to {{SPECTRE_CASCADE_COVERAGE}} of the network in
-the fixed cascade model — the surveillance footprint of a single hub.
+centralization index over out-degrees is {{SPECTRE_CENTRALIZATION_INDEX}}:
+sending concentrates strongly on one agency.
 
-![The Nine Eyes agency network: node size is betweenness centrality, arrows are data flows.](figures/network_flow_centralization.png){#fig:network_flow_centralization}
+The inflow-share Herfindahl index does **not** corroborate that reading, and is
+not reported as if it did. It measures {{SPECTRE_FLOW_CONCENTRATION_HHI}}
+against a floor of {{SPECTRE_FLOW_CONCENTRATION_FLOOR}} — the value an
+inflow-share vector spread perfectly evenly over the
+{{SPECTRE_NUM_RECEIVING_AGENCIES}} agencies that receive anything would take.
+Sitting that close to the floor means received volume is nearly uniform across
+those agencies. The two indices are measuring opposite ends of the same edges,
+and on this network they disagree: concentration is a property of the sending
+side only.
+
+A signal seeded at the largest sender propagates to a mean
+{{SPECTRE_CASCADE_COVERAGE}} of the network over {{SPECTRE_CASCADE_TRIALS}}
+seeded cascade realizations. This is an estimated expectation, not a single
+draw; individual realizations range widely either side of it, and no single
+realization is quoted anywhere in this report.
+
+![The Nine Eyes agency network. Node area is betweenness centrality and arrows are directed data flows. The largest sender (ringed, marked ▸) has betweenness exactly 0 — no shortest path passes through a pure source — so it is drawn at the minimum node size despite originating most of the traffic; the figure title names both readings.](figures/network_flow_centralization.png){#fig:network_flow_centralization}
 
 ## Criminal-org cell model
 
-The {{SPECTRE_NUM_OPERATIVES}} brotherhood operatives are partitioned into
+The {{SPECTRE_NUM_OPERATIVES}} brotherhood operatives — one node per distinct
+film character, see §5 — are partitioned into
 {{SPECTRE_NUM_CELLS}} cells. The organization's command chain is complete
 ({{SPECTRE_CHAIN_COMPLETE}}) — every operative is reached by a breadth-first
 walk from the apex — with a hierarchy height of {{SPECTRE_HIERARCHY_HEIGHT}}

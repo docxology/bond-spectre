@@ -1,9 +1,13 @@
 # Conclusion
 
 The NINE EYES package demonstrates that a surveillance programme's vulnerability
-is a *geometric* property. The measured centralization index and flow
-concentration show a network whose resilience collapses when its hub — the
-single critical agency — is removed; the brotherhood model quantifies both its
+is a *geometric* property. The measured out-degree centralization index and the
+articulation-point analysis show a network whose connectivity collapses when
+its hub — the single critical agency — is removed. The inflow-share Herfindahl
+index does not support that conclusion and is not enlisted to: it sits just
+above its even-spread floor, which is evidence that receiving is *not*
+concentrated. Reporting it is worth doing precisely because it disagrees; the
+brotherhood model quantifies both its
 command completeness and its imperfectly compartmentalized cells; and the
 geometry kernel identifies, greedily, the exact nodes whose removal fragments
 the system. All of this is deterministic, computed from real data structures

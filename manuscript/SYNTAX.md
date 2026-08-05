@@ -41,9 +41,10 @@ text.
 
 | Token | Computed by |
 | --- | --- |
-| `{{SPECTRE_CENTRALIZATION_INDEX}}` | `surveillance_net.group_centralization` |
-| `{{SPECTRE_FLOW_CONCENTRATION_HHI}}` | `surveillance_net.herfindahl_index` |
-| `{{SPECTRE_CASCADE_COVERAGE}}` | `surveillance_net.cascade_coverage` |
+| `{{SPECTRE_CENTRALIZATION_INDEX}}` | `surveillance_net.group_centralization` (star bound `n − 1`) |
+| `{{SPECTRE_FLOW_CONCENTRATION_HHI}}` | `surveillance_net.herfindahl_index` over `data_share_centrality` |
+| `{{SPECTRE_FLOW_CONCENTRATION_FLOOR}}`, `{{SPECTRE_NUM_RECEIVING_AGENCIES}}` | `surveillance_net.uniform_share_index` — never quote the HHI without its floor |
+| `{{SPECTRE_CASCADE_COVERAGE}}`, `{{SPECTRE_CASCADE_TRIALS}}` | `surveillance_net.expected_cascade_coverage` (trial mean, not one draw) |
 | `{{SPECTRE_HIERARCHY_HEIGHT}}`, `{{SPECTRE_CHAIN_COMPLETE}}` | `org_intel.hierarchy_stats` |
 | `{{SPECTRE_COMPARTMENTALIZATION}}` | `org_intel.compartmentalization` |
 | `{{SPECTRE_NUM_ARTICULATION_POINTS}}`, `{{SPECTRE_ARTICULATION_NODES}}` | `network_geometry.articulation_points` |

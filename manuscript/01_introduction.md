@@ -9,9 +9,12 @@ structural and three operational.
 The structural questions ask what the network and the organisation *are*:
 
 1. **How centralized are surveillance data flows?** If a single agency sits at
-   the hub of every sharing link, the network is highly centralized: a single
-   compromised hub exposes the whole exchange, and the flow concentration is
-   high.
+   the hub of every sharing link, the network is highly centralized and a
+   single compromised hub exposes the whole exchange. Sending and receiving
+   are separate readings and need not agree: a lone source can dominate the
+   out-degree while its recipients each receive a comparable trickle, so an
+   out-degree centralization index and an inflow-share concentration index are
+   two measurements, not one measurement corroborated twice.
 2. **How is a criminal brotherhood structured?** SPECTRE is a compartmentalized
    organization: isolated cells whose members know only their own cell,
    underneath an apex leadership. The intelligence question is how "separable"

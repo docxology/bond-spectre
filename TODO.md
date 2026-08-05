@@ -7,8 +7,10 @@
 - **`src/spectre/surveillance_net.py`** — Nine Eyes data-flow centralization:
   `build_network`, `network_from_adjacency`, `out/in_degree_centrality`,
   `group_centralization` (Freeman), `betweenness_centrality` (Brandes),
-  `herfindahl_index`, `data_share_centrality`, `cascade_coverage`
-  (fixed-seed independent cascade), `sweep_coverage`.
+  `herfindahl_index`, `data_share_centrality` (normalized inflow shares),
+  `uniform_share_index` (that index's even-spread floor), `cascade_coverage`
+  (one seeded independent-cascade realization), `expected_cascade_coverage`
+  (trial-averaged expectation), `sweep_coverage`.
 - **`src/spectre/org_intel.py`** — SPECTRE criminal-org intelligence:
   `build_org`, `hierarchy_stats` (BFS apex reachability), `cell_membership`,
   `compartmentalization`, `command_reachability`, `exposure`.
@@ -107,3 +109,17 @@
       the deepened code, seven further real references, dead/unreachable
       branches removed or made testable, coverage raised to full line+branch on
       `src/`.
+- [x] Phase-6 adversarial remediation: five SEVERE + six MODERATE verifier
+      findings resolved. `data_share_centrality` was returning a 0/1 indicator
+      (column self-normalization) — fixed to real inflow shares, which moved
+      the reported HHI from 0.1250 to 0.1361 and exposed that the index sits
+      just above its even-spread floor rather than corroborating hub dominance;
+      the prose now says so. The figure title named the betweenness leader as
+      "hub" while the text named the sending hub — both readings are now named
+      and the sender is ringed. The cascade seed is plumbed through instead of
+      recorded-but-ignored, and the cascade figure is a 50-trial mean rather
+      than one Bernoulli draw. The brotherhood roster lost three alias nodes
+      (Oberhauser = Blofeld; Hinx = Bautista = Mr Hinx). Hollow tests replaced
+      with value pins re-derived from the edge list; the tautological inventory
+      gate pinned to literals; the claim ledger extended from 11 rows to one
+      per measured token and made an enforced gate.

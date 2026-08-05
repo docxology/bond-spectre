@@ -20,7 +20,7 @@ deterministic analysis modules behind one frozen mission protocol.
 
 | Module | What it computes |
 | --- | --- |
-| `src/spectre/surveillance_net.py` | Directed agency network (from an edge list or a validated adjacency matrix), out/in-degree centrality, Freeman group centralization, Brandes betweenness, Herfindahl flow concentration, inflow-share centrality, fixed-seed influence cascade, sweep coverage |
+| `src/spectre/surveillance_net.py` | Directed agency network (from an edge list or a validated adjacency matrix), out/in-degree centrality, Freeman group centralization, Brandes betweenness, inflow-share centrality with its Herfindahl concentration **and that index's even-spread floor**, seeded influence cascade (single realization and trial-averaged expectation), sweep coverage |
 | `src/spectre/org_intel.py` | Brotherhood construction and validation, command depths/height, BFS apex reachability, cell membership, cross-cell compartmentalization, per-operative exposure |
 | `src/spectre/network_geometry.py` | Connected components, articulation points (Tarjan), all-pairs BFS distances, Latora–Marchiori global efficiency, node-removal impact, robustness-under-attack curve, greedy critical-node ordering |
 | `src/spectre/traffic_intel.py` | Volume-weighted traffic network, total volume, heavy-hitter links, interception coverage of a monitored set, greedy submodular monitoring-budget allocation with label-ordered tie-breaks |
@@ -83,7 +83,15 @@ failure — re-run with the sandbox disabled.
 - **Infrastructure-free core**: `numpy` + stdlib only in the six domain modules;
   safe to lift into any environment.
 - **No gate that cannot fail**: validation branches unreachable from their call
-  sites were removed or made reachable and tested.
+  sites were removed or made reachable and tested. Metric tests pin exact
+  values re-derived from the edge list rather than asserting `> 0`, seeded
+  computations are asserted *sensitive* to their seed as well as reproducible,
+  and inventory tokens are pinned to literals rather than to the expressions
+  that generate them.
+- **Enforced claim ledger**: [`data/claim_ledger.yaml`](data/claim_ledger.yaml)
+  holds one row per measured manuscript token, and `tests/test_claim_ledger.py`
+  fails on a missing row, a stale row, or a drifted value — the coverage claim
+  is a gate, not a sentence.
 
 ## Gates
 
@@ -104,7 +112,7 @@ real run — this README states the gate, not a figure that can go stale.
 - [`docs/`](docs/README.md) — architecture, agent instructions, testing philosophy.
 - [`manuscript/`](manuscript/README.md) — the publication surface and token protocol.
 - [`TODO.md`](TODO.md) — build log and remaining work.
-- [`data/claim_ledger.yaml`](data/claim_ledger.yaml) — every measured claim and its source.
+- [`data/claim_ledger.yaml`](data/claim_ledger.yaml) — one row per measured manuscript token: recorded value, producing function, artifact path. Reconciled by `tests/test_claim_ledger.py`.
 
 Local-only working tree — this package is part of the BOND suite and is never
 pushed to any remote.

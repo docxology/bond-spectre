@@ -11,18 +11,23 @@ uv run python -c "import sys; sys.path.insert(0,'src'); from spectre.manuscript_
 
 | Metric | Value |
 | --- | --- |
-| Test count | 189 |
+| Test count | 236 |
 | Coverage (line+branch on `src/`) | 100.00% |
-| Statements / branches measured | 877 / 338 |
+| Statements / branches measured | 922 / 356 |
 | Domain modules | 6 (infiltration, network_geometry, org_intel, signal_cover, surveillance_net, traffic_intel) |
 | Mission stages | 5 (brief, recon, plan, execute, debrief) |
 | Plan steps | 6 |
 | Registered gadgets | 6 |
-| Manuscript tokens | 40 |
+| Manuscript tokens | 43 (34 measured + 9 environment; see `ENVIRONMENT_TOKENS`) |
+| Claim-ledger rows | 34 (one per measured token, reconciled by `tests/test_claim_ledger.py`) |
 | Manuscript sections resolved | 9 (00–07, 99) |
 | Bibliography entries | 15 |
 
 Measured on the run that produced the coverage table above. The module, gadget,
 plan-step and token counts are additionally asserted live by
 `tests/test_manuscript_variables.py::TestMeasuredInventories`, so drift between
-the code and those rows fails the suite rather than sitting here quietly.
+the code and those rows fails the suite rather than sitting here quietly. Those
+assertions compare the tokens against *literals* — an earlier revision compared
+each token to the expression that generates it (`int(token) == len(gadget_names())`
+where the token is `str(len(gadget_names()))`), which is `x == x` and could not
+fail for any code change.

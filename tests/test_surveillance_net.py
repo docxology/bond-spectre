@@ -13,12 +13,14 @@ from spectre.surveillance_net import (
     build_network,
     cascade_coverage,
     data_share_centrality,
+    expected_cascade_coverage,
     group_centralization,
     herfindahl_index,
     in_degree_centrality,
     network_from_adjacency,
     out_degree_centrality,
     sweep_coverage,
+    uniform_share_index,
 )
 
 NODES = ("US", "UK", "CA", "DE")
@@ -133,10 +135,69 @@ class TestHerfindahl:
 
 
 class TestDataShare:
-    def test_shares_present(self) -> None:
+    """Value assertions, not key assertions.
+
+    The predecessor of this class asserted only that the score keys equalled
+    the node labels, which passes identically whether the function returns
+    shares, indicators or zeros — and it did in fact pass while the function
+    returned a 0/1 indicator. Every test below inspects values.
+    """
+
+    def test_shares_are_inflow_fractions(self) -> None:
+        # In-degrees on the fixture: US 0, UK 1, CA 1, DE 2 over 4 edges.
         net = build_network(NODES, EDGES)
-        result = data_share_centrality(net)
-        assert set(result.scores.keys()) == set(NODES)
+        scores = data_share_centrality(net).scores
+        assert scores["US"] == pytest.approx(0.0)
+        assert scores["UK"] == pytest.approx(0.25)
+        assert scores["CA"] == pytest.approx(0.25)
+        assert scores["DE"] == pytest.approx(0.5)
+
+    def test_shares_sum_to_one(self) -> None:
+        net = build_network(NODES, EDGES)
+        assert sum(data_share_centrality(net).scores.values()) == pytest.approx(1.0)
+
+    def test_top_is_the_largest_receiver(self) -> None:
+        net = build_network(NODES, EDGES)
+        assert data_share_centrality(net).top[0] == "DE"
+
+    def test_shares_are_not_indicators(self) -> None:
+        """Two receivers of unequal inflow must not score the same.
+
+        This is the assertion the shipped bug would have failed: under
+        column-self-normalization every agency with any inflow scored exactly
+        1.0, so UK (one inbound edge) and DE (two) were indistinguishable.
+        """
+        net = build_network(NODES, EDGES)
+        scores = data_share_centrality(net).scores
+        assert scores["DE"] > scores["UK"]
+        assert scores["DE"] == pytest.approx(2 * scores["UK"])
+
+    def test_edgeless_network_has_no_shares(self) -> None:
+        net = build_network(NODES, ())
+        assert set(data_share_centrality(net).scores.values()) == {0.0}
+
+
+class TestUniformShareIndex:
+    def test_floor_is_one_over_receiving_agencies(self) -> None:
+        # UK, CA and DE receive; US does not -> floor 1/3.
+        net = build_network(NODES, EDGES)
+        assert uniform_share_index(net) == pytest.approx(1.0 / 3.0)
+
+    def test_measured_hhi_is_at_or_above_the_floor(self) -> None:
+        net = build_network(NODES, EDGES)
+        shares = data_share_centrality(net).scores
+        measured = herfindahl_index([shares[label] for label in NODES])
+        assert measured >= uniform_share_index(net)
+
+    def test_even_inflow_hits_the_floor_exactly(self) -> None:
+        net = build_network(NODES, (("US", "UK"), ("US", "CA"), ("US", "DE")))
+        shares = data_share_centrality(net).scores
+        measured = herfindahl_index([shares[label] for label in NODES])
+        assert measured == pytest.approx(uniform_share_index(net))
+
+    def test_no_receiver_raises(self) -> None:
+        with pytest.raises(ValueError, match="even-spread floor"):
+            uniform_share_index(build_network(NODES, ()))
 
 
 class TestCascadeCoverage:
@@ -174,6 +235,67 @@ class TestCascadeCoverage:
         high = cascade_coverage(net, ("US",), 0.99)
         low = cascade_coverage(net, ("US",), 0.01)
         assert low.coverage_fraction <= high.coverage_fraction
+
+
+class TestCascadeSeedGovernsTheDraws:
+    """The seed argument must change the realization, not merely be recorded."""
+
+    def test_two_seeds_disagree_somewhere(self) -> None:
+        net = build_network(NODES, EDGES)
+        reached = {cascade_coverage(net, ("US",), 0.5, seed=s).activated for s in range(12)}
+        assert len(reached) > 1, "seed does not influence the cascade"
+
+    def test_same_seed_reproduces(self) -> None:
+        net = build_network(NODES, EDGES)
+        a = cascade_coverage(net, ("US",), 0.5, seed=7)
+        b = cascade_coverage(net, ("US",), 0.5, seed=7)
+        assert a.activated == b.activated
+
+    def test_default_seed_is_zero(self) -> None:
+        net = build_network(NODES, EDGES)
+        assert cascade_coverage(net, ("US",), 0.5).activated == (cascade_coverage(net, ("US",), 0.5, seed=0).activated)
+
+
+class TestExpectedCascadeCoverage:
+    def test_mean_is_between_the_extreme_realizations(self) -> None:
+        net = build_network(NODES, EDGES)
+        draws = [cascade_coverage(net, ("US",), 0.5, seed=3 + i).coverage_fraction for i in range(40)]
+        mean = expected_cascade_coverage(net, ("US",), 0.5, trials=40, seed=3)
+        assert min(draws) <= mean <= max(draws)
+        assert mean == pytest.approx(sum(draws) / len(draws))
+
+    def test_mean_differs_from_a_single_draw(self) -> None:
+        """The headline number must not be one Bernoulli sample dressed up."""
+        net = build_network(NODES, EDGES)
+        single = cascade_coverage(net, ("US",), 0.5, seed=11).coverage_fraction
+        mean = expected_cascade_coverage(net, ("US",), 0.5, trials=50, seed=11)
+        assert mean != pytest.approx(single)
+
+    def test_certain_activation_reaches_everything(self) -> None:
+        net = build_network(NODES, EDGES)
+        assert expected_cascade_coverage(net, ("US",), 1.0, trials=5, seed=0) == pytest.approx(1.0)
+
+    def test_seed_shifts_the_mean(self) -> None:
+        net = build_network(NODES, EDGES)
+        means = {expected_cascade_coverage(net, ("US",), 0.5, trials=5, seed=s) for s in range(8)}
+        assert len(means) > 1
+
+    def test_deterministic(self) -> None:
+        net = build_network(NODES, EDGES)
+        a = expected_cascade_coverage(net, ("US",), 0.6, trials=25, seed=11)
+        b = expected_cascade_coverage(net, ("US",), 0.6, trials=25, seed=11)
+        assert a == b
+
+    def test_nonpositive_trials_raises(self) -> None:
+        net = build_network(NODES, EDGES)
+        with pytest.raises(ValueError, match="trials must be positive"):
+            expected_cascade_coverage(net, ("US",), 0.5, trials=0)
+
+    def test_generator_sources_survive_the_trial_loop(self) -> None:
+        """A generator must be materialized once, not exhausted after trial 1."""
+        net = build_network(NODES, EDGES)
+        mean = expected_cascade_coverage(net, (label for label in ("US",)), 1.0, trials=3, seed=0)
+        assert mean == pytest.approx(1.0)
 
 
 class TestSweepCoverage:

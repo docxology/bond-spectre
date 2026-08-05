@@ -15,14 +15,19 @@ set cover.
 
 Over the canonical NINE EYES network of {{SPECTRE_NUM_NODES}} agencies and
 {{SPECTRE_NUM_EDGES}} directed data-sharing links, the measured group
-centralization index is {{SPECTRE_CENTRALIZATION_INDEX}} and the flow
-concentration (Herfindahl index) is {{SPECTRE_FLOW_CONCENTRATION_HHI}}. The
-SPECTRE brotherhood of {{SPECTRE_NUM_OPERATIVES}} operatives across
-{{SPECTRE_NUM_CELLS}} cells achieves a compartmentalization of
-{{SPECTRE_COMPARTMENTALIZATION}} with a command chain that is complete
-({{SPECTRE_CHAIN_COMPLETE}}) to a height of {{SPECTRE_HIERARCHY_HEIGHT}}.
-Geometry analysis finds {{SPECTRE_NUM_ARTICULATION_POINTS}} articulation points;
-the most load-bearing critical nodes are {{SPECTRE_CRITICAL_NODES}}.
+centralization index over out-degrees is {{SPECTRE_CENTRALIZATION_INDEX}}: one
+agency does almost all of the sending. The two directions do not agree. The
+Herfindahl index of the *inflow* shares is {{SPECTRE_FLOW_CONCENTRATION_HHI}}
+against an even-spread floor of {{SPECTRE_FLOW_CONCENTRATION_FLOOR}} for the
+{{SPECTRE_NUM_RECEIVING_AGENCIES}} agencies that receive anything at all — so
+receiving is close to evenly distributed, and the concentration this network
+exhibits is in who sends, not in who is fed. The SPECTRE brotherhood of
+{{SPECTRE_NUM_OPERATIVES}} operatives across {{SPECTRE_NUM_CELLS}} cells
+achieves a compartmentalization of {{SPECTRE_COMPARTMENTALIZATION}} with a
+command chain that is complete ({{SPECTRE_CHAIN_COMPLETE}}) to a height of
+{{SPECTRE_HIERARCHY_HEIGHT}}. Geometry analysis finds
+{{SPECTRE_NUM_ARTICULATION_POINTS}} articulation points; the most load-bearing
+critical nodes are {{SPECTRE_CRITICAL_NODES}}.
 
 The operational layer adds budgeted *interception* ({{SPECTRE_MONITOR_BUDGET}}
 monitoring agencies capture {{SPECTRE_MONITOR_COVERAGE}} of the exchange),

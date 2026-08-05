@@ -156,8 +156,48 @@ class TestMeasuredInventories:
         assert "mission" not in names
         assert "manuscript_variables" not in names
 
-    def test_inventory_tokens_match_the_inventories(self) -> None:
+    def test_inventory_tokens_are_pinned_to_literals(self) -> None:
+        """Pin the inventories to constants, not to their own generators.
+
+        The predecessor of this test asserted
+        ``int(variables["SPECTRE_NUM_GADGETS"]) == len(gadget_names())`` — but
+        the token is *defined* as ``str(len(gadget_names()))``, so all three
+        assertions were ``x == x`` and could not fail for any code change.
+        The literals below are the independent side: adding a gadget, a plan
+        step or a domain module turns this red, which is the point (the
+        manuscript and ``docs/_generated/COUNTS.md`` quote these numbers).
+        """
         variables = generate_variables()
-        assert int(variables["SPECTRE_NUM_DOMAIN_MODULES"]) == len(domain_module_names())
-        assert int(variables["SPECTRE_NUM_GADGETS"]) == len(gadget_names())
-        assert int(variables["SPECTRE_PLAN_STEPS"]) == len(PROVIDER.plan(PROVIDER.brief()).steps)
+        assert variables["SPECTRE_NUM_DOMAIN_MODULES"] == "6"
+        assert variables["SPECTRE_NUM_GADGETS"] == "6"
+        assert variables["SPECTRE_PLAN_STEPS"] == "6"
+        assert variables["SPECTRE_NUM_OBJECTIVES"] == "3"
+        assert gadget_names() == (
+            "geometry_efficiency",
+            "infiltration_damage",
+            "org_compartmentalization",
+            "signal_set_cover",
+            "surveillance_centralization",
+            "traffic_interception",
+        )
+        assert tuple(step.name for step in PROVIDER.plan(PROVIDER.brief()).steps) == (
+            "flow_survey",
+            "org_intel",
+            "geometry",
+            "traffic_intel",
+            "infiltration",
+            "signal_cover",
+        )
+        assert domain_module_names() == (
+            "infiltration",
+            "network_geometry",
+            "org_intel",
+            "signal_cover",
+            "surveillance_net",
+            "traffic_intel",
+        )
+
+    def test_inventory_tokens_render_the_inventories(self) -> None:
+        """The tokens must still be *derived*, not literals of their own."""
+        variables = generate_variables()
+        assert variables["SPECTRE_DOMAIN_MODULES"] == ", ".join(domain_module_names())

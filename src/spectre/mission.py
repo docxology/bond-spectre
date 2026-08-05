@@ -58,11 +58,12 @@ from spectre.signal_cover import (
 from spectre.surveillance_net import (
     SurveillanceNetwork,
     build_network,
-    cascade_coverage,
     data_share_centrality,
+    expected_cascade_coverage,
     group_centralization,
     herfindahl_index,
     out_degree_centrality,
+    uniform_share_index,
 )
 from spectre.traffic_intel import (
     canonical_traffic_network,
@@ -86,8 +87,16 @@ __all__ = [
     "gadget_names",
 ]
 
-#: Deterministic RNG seed for any stochastic component (cascade activation).
+#: Deterministic RNG seed for every stochastic component. It is the base seed
+#: passed to the surveillance cascade (``expected_cascade_coverage``) and the
+#: compromise cascade (``expected_damage``); both derive per-trial seeds as
+#: ``_SEED + i``. Changing it changes the reported cascade numbers — which is
+#: what makes recording it in ``Provenance`` meaningful.
 _SEED = 11
+
+#: Trials averaged for each of the two cascades. A single Bernoulli draw is a
+#: sample, not an expectation, so neither cascade is reported from one run.
+_CASCADE_TRIALS = 50
 
 #: Canonical Nine Eyes agency labels.
 NINE_EYES_NODES: tuple[str, ...] = ("UK", "US", "CA", "AU", "NZ", "DE", "FR", "ES", "SE")
@@ -113,39 +122,47 @@ NINE_EYES_NETWORK: dict[str, object] = {
     "edges": NINE_EYES_EDGES,
 }
 
-#: Canonical SPECTRE brotherhood operatives.
+# The roster below is a *distinct-person* roster: one node per film character.
+# It previously carried three aliases as if they were separate operatives —
+# "Franz Oberhauser" is Blofeld's birth name (the same character), and both
+# "Hinx" and "Bautista" duplicated Mr Hinx ("Bautista" being the actor who
+# plays him). Those duplicates inflated the operative count and manufactured
+# the executive layer, so they are gone. What remains is seven distinct
+# characters.
+#
+# The cell assignment and the superior-of edges are a *modelling construct*:
+# the film establishes Blofeld at the apex, Mr Hinx as an enforcer, Mr White
+# as a former member, Madeleine Swann as his daughter, and C as an inside
+# collaborator, but it does not publish an org chart. No claim of canonical
+# fidelity is made for the edges — only that no two nodes are the same person.
+
+#: Canonical SPECTRE brotherhood operatives (one node per distinct character).
 SPECTRE_OPERATIVES: tuple[str, ...] = (
     "Ernst Blofeld",
     "Madeleine Swann",
     "Mr White",
-    "Franz Oberhauser",
-    "Hinx",
-    "Guerrin",
-    "Bautista",
-    "C",
     "Mr Hinx",
+    "Marco Sciarra",
+    "Guerra",
+    "C",
 )
 #: Operative -> cell id.
 SPECTRE_CELL_OF: dict[str, str] = {
     "Madeleine Swann": "white",
     "Mr White": "white",
-    "Franz Oberhauser": "white",
-    "Hinx": "enforcer",
-    "Guerrin": "enforcer",
-    "Bautista": "enforcer",
-    "C": "shadow",
     "Mr Hinx": "enforcer",
+    "Marco Sciarra": "enforcer",
+    "Guerra": "enforcer",
+    "C": "shadow",
 }
 #: Operative -> superior (None marks an apex).
 SPECTRE_PARENT_OF: dict[str, str | None] = {
-    "Franz Oberhauser": "Ernst Blofeld",
-    "Madeleine Swann": "Mr White",
     "Mr White": "Ernst Blofeld",
-    "Hinx": "Franz Oberhauser",
-    "Guerrin": "Franz Oberhauser",
-    "Bautista": "Franz Oberhauser",
-    "C": "Franz Oberhauser",
-    "Mr Hinx": "Franz Oberhauser",
+    "Madeleine Swann": "Mr White",
+    "Mr Hinx": "Ernst Blofeld",
+    "Marco Sciarra": "Mr Hinx",
+    "Guerra": "Mr Hinx",
+    "C": "Ernst Blofeld",
 }
 #: Apex leadership.
 SPECTRE_LEADERSHIP: tuple[str, ...] = ("Ernst Blofeld",)
@@ -240,11 +257,16 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
         org = self._org
 
         out_degree = out_degree_centrality(net).scores
-        centrality = group_centralization(out_degree)
+        # Explicit star-graph bound (n - 1), the denominator the methodology
+        # states. Left implicit, group_centralization would normalize by the
+        # observed maximum, which only coincides with n - 1 when some agency
+        # happens to reach every other one.
+        centrality = group_centralization(out_degree, maximum_score=float(net.n - 1))
         shares = data_share_centrality(net)
         shares_list = [shares.scores[label] for label in net.nodes]
         concentration = herfindahl_index(shares_list)
-        cascade = cascade_coverage(net, ("US",), 0.6)
+        concentration_floor = uniform_share_index(net)
+        cascade_mean = expected_cascade_coverage(net, ("US",), 0.6, trials=_CASCADE_TRIALS, seed=_SEED)
 
         hierarchy = hierarchy_stats(org)
         separation = compartmentalization(org)
@@ -262,7 +284,7 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
         top_links = heavy_hitters(traffic, 3)
         monitor_selected, monitor_coverage = monitor_allocation(traffic, budget=3)
 
-        damage = expected_damage(org, ("Mr White",), turn_probability=0.5, trials=50, seed=_SEED)
+        damage = expected_damage(org, ("Mr White",), turn_probability=0.5, trials=_CASCADE_TRIALS, seed=_SEED)
 
         cover = canonical_coverage_problem()
         cover_selected, cover_covered = greedy_set_cover(cover)
@@ -273,7 +295,10 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
             "plan_steps": len(plan.steps),
             "centralization_index": round(centrality, 4),
             "flow_concentration_hhi": round(concentration, 4),
-            "cascade_coverage": round(cascade.coverage_fraction, 4),
+            "flow_concentration_floor": round(concentration_floor, 4),
+            "receiving_agencies": int((net.adjacency.sum(axis=0) > 0).sum()),
+            "cascade_coverage": round(cascade_mean, 4),
+            "cascade_trials": _CASCADE_TRIALS,
             "hierarchy_height": hierarchy.height,
             "chain_complete": bool(hierarchy.chain_complete),
             "compartmentalization": round(separation, 4),

@@ -27,11 +27,13 @@ Models the sharing programme as a **directed** graph of agencies.
 | `build_network(nodes, edges)` | Validated `SurveillanceNetwork` from an edge list (rejects duplicate labels, unknown endpoints, self-loops) |
 | `network_from_adjacency(nodes, matrix)` | The same network from a caller-supplied matrix; validates shape, label uniqueness and the diagonal, and copies the array |
 | `out_degree_centrality` / `in_degree_centrality` | Volume each agency pushes downstream / pulls upstream |
-| `group_centralization(scores)` | Freeman's group degree centralization `Σ(max − sᵢ) / ((n−1)·max)` in `[0, 1]` |
+| `group_centralization(scores, *, maximum_score)` | Freeman's group degree centralization `Σ(max − sᵢ) / ((n−1)·max)` in `[0, 1]`. `mission.py` passes `maximum_score = n − 1` explicitly (the star-graph bound the methodology states); the default observed-maximum form computes a different quantity whenever no node reaches every other |
 | `betweenness_centrality` | Brandes' algorithm (unweighted, directed): the share of shortest data paths through each agency |
 | `herfindahl_index(values)` | HHI concentration `Σ shareᵢ²` over the normalized flow vector |
-| `data_share_centrality` | Column-normalized inflow share per agency |
-| `cascade_coverage(net, sources, p)` | Fixed-seed Bernoulli influence cascade from seed agencies; returns the reached set and the covered fraction |
+| `data_share_centrality` | Each agency's share of all inbound flow: `in_degree / total in_degree`, a vector summing to 1 (0 everywhere on an edgeless network) |
+| `uniform_share_index(net)` | The HHI floor `1 / r` for that share vector, `r` = agencies with non-zero in-degree; the measured index is uninterpretable without it |
+| `cascade_coverage(net, sources, p, *, seed)` | **One** seeded Bernoulli realization of the influence cascade; returns the reached set and the covered fraction |
+| `expected_cascade_coverage(net, sources, p, *, trials, seed)` | Mean coverage over `trials` realizations at per-trial seeds `seed + i` — the estimator the manuscript reports |
 | `sweep_coverage(captured, total)` | Fraction of a target population swept by at least one agency |
 
 ### `org_intel.py` — the SPECTRE brotherhood as a compartmentalized org

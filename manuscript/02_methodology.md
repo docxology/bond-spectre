@@ -20,21 +20,37 @@ $$
 $$ {#eq:group_centralization}
 
 measures how concentrated the flows are, from 0 (evenly spread) to 1 (a single
-hub dominates); the normalizing denominator is the total deviation of the
-star graph on `n` nodes. The Herfindahl–Hirschman index [@Hirschman1964] of
-inflow shares,
+hub dominates). The normalizing denominator is the total deviation of the star
+graph on `n` nodes, so `s_max` is passed explicitly as `n - 1` rather than left
+to default to the largest observed score; the two agree on this dataset only
+because the maximum out-degree happens to equal `n - 1`, and on any input where
+it does not, the observed-maximum form reports a different quantity from the
+one written above. The Herfindahl–Hirschman index [@Hirschman1964] of inflow
+shares,
 
 $$
 \HHI = \sum_i \left( \frac{f_i}{\sum_j f_j} \right)^{\!2},
 $$ {#eq:hhi}
 
-measures flow concentration independently of the degree distribution's shape.
+is computed over the normalized in-degree share vector (which sums to 1) and
+measures inflow concentration independently of the out-degree distribution. It
+is reported against its floor `1/r`, where `r` is the number of agencies with
+non-zero in-degree: the index alone is not interpretable, because its minimum
+is not 0 but `1/r`, and a value near that floor means *even spread*, not
+concentration.
+
 Betweenness centrality — the share of shortest data paths passing through each
 agency — is computed with Brandes' predecessor accumulation [@Brandes2001] and
-drives the node sizing in @fig:network_flow_centralization. Cascade coverage
-runs an independent-cascade process [@Kempe2003] from a seeding agency at a
-fixed activation probability and reports the fraction of the network reached —
-the surveillance footprint of that seed.
+drives the node sizing in @fig:network_flow_centralization. Note that
+betweenness and out-degree rank different agencies first: a pure source has no
+inbound edge, so no shortest path passes through it and its betweenness is
+exactly 0 no matter how much it sends.
+
+Cascade coverage runs an independent-cascade process [@Kempe2003] from a
+seeding agency at a fixed activation probability. A single run is one Bernoulli
+realization, not an expectation, so the reported coverage is the mean over
+{{SPECTRE_CASCADE_TRIALS}} realizations whose per-trial seeds are derived from
+one base seed — the same treatment the compromise cascade receives below.
 
 Networks are constructed either from an edge list, where every invariant is
 enforced as the matrix is filled, or from an existing adjacency matrix, which

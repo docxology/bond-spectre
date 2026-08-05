@@ -50,9 +50,12 @@ before the fleet does.
 
 ## Determinism rules
 
-1. Every RNG is explicitly seeded (`_SEED` in `mission.py`, the `seed`
-   parameter of `simulate_compromise`/`expected_damage`, the layout seed in
-   `figures/networks.py`, the fixed cascade seed in `cascade_coverage`).
+1. Every RNG is explicitly seeded, and every recorded seed is *consumed*.
+   `_SEED` in `mission.py` is the single base seed: it is passed to
+   `expected_cascade_coverage` and to `expected_damage`, both of which derive
+   per-trial seeds as `seed + i`. `figures/networks.py` has its own layout
+   seed. A seed recorded in `Provenance` that no computation reads is a false
+   provenance claim — `tests/test_mission.py` asserts the causal link.
 2. No wall-clock in persisted artifacts: `Provenance.wall_time_s` is `0.0` by
    construction. `GENERATION_TIMESTAMP` exists only in the hydrated manuscript,
    never in the mission record.
