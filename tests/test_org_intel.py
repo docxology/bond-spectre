@@ -154,3 +154,49 @@ class TestExposure:
         assert "Blofeld" in turned
         # Direct subordinates of the apex
         assert "Oberhauser" in turned or "White" in turned
+
+
+class TestBuildOrgErrorBranches:
+    def test_unknown_operative_in_parent_of_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown operative 'Ghost' in parent_of"):
+            build_org(("A", "B"), {"A": "cell"}, {"Ghost": "A"})
+
+    def test_unknown_superior_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown superior"):
+            build_org(("A", "B"), {"A": "cell"}, {"A": "Ghost"})
+
+
+class TestHierarchyCycleGuard:
+    def test_command_cycle_terminates(self) -> None:
+        """A malformed A->B->A command loop must not hang the depth walk."""
+        org = build_org(("A", "B"), {"A": "c1", "B": "c1"}, {"A": "B", "B": "A"})
+        stats = hierarchy_stats(org)
+        # No apex exists, so no operative is reachable from leadership: the
+        # depth walk still terminates, but the chain is reported incomplete.
+        assert stats.reachable_from_apex == 0
+        assert stats.chain_complete is False
+        assert stats.height >= 1
+
+
+class TestCommandReachabilityRequeue:
+    def test_leader_that_is_also_a_subordinate_is_visited_once(self) -> None:
+        """B is both declared leadership and a subordinate of A: no double visit."""
+        org = build_org(
+            ("A", "B", "C"),
+            {"A": "c1", "B": "c1", "C": "c2"},
+            {"B": "A", "C": "B"},
+            leadership=("A", "B"),
+        )
+        assert command_reachability(org) == {"A", "B", "C"}
+
+
+class TestExplicitApexParent:
+    def test_none_parent_is_not_a_command_edge(self) -> None:
+        """An operative explicitly mapped to None is an apex, not a subordinate."""
+        org = build_org(
+            ("Blofeld", "White"),
+            {"Blofeld": "core", "White": "white"},
+            {"Blofeld": None, "White": "Blofeld"},
+        )
+        assert command_reachability(org) == {"Blofeld", "White"}
+        assert hierarchy_stats(org).chain_complete is True

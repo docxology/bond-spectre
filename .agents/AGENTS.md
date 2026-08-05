@@ -8,5 +8,5 @@ Per-folder technical reference for the project-local agent scaffolding.
 
 ## When to update
 
-- A new skill specific to this template lands → add a folder under
+- A new skill specific to this package lands → add a folder under
   `skills/<name>/` with `SKILL.md`, `AGENTS.md`, `README.md`.

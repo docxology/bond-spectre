@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from spectre.surveillance_net import (
@@ -15,6 +16,7 @@ from spectre.surveillance_net import (
     group_centralization,
     herfindahl_index,
     in_degree_centrality,
+    network_from_adjacency,
     out_degree_centrality,
     sweep_coverage,
 )
@@ -196,3 +198,59 @@ class TestNumpyTypes:
         result = out_degree_centrality(net)
         for value in result.scores.values():
             assert isinstance(value, float)
+
+
+class TestNetworkFromAdjacency:
+    """The matrix constructor validates what build_network enforces by construction."""
+
+    def test_valid_matrix_round_trips(self) -> None:
+        built = build_network(NODES, EDGES)
+        rebuilt = network_from_adjacency(NODES, built.adjacency)
+        assert rebuilt.nodes == built.nodes
+        assert np.array_equal(rebuilt.adjacency, built.adjacency)
+
+    def test_matrix_is_copied(self) -> None:
+        built = build_network(NODES, EDGES)
+        rebuilt = network_from_adjacency(NODES, built.adjacency)
+        built.adjacency[0, 1] = 0
+        assert int(rebuilt.adjacency[0, 1]) == 1
+
+    def test_wrong_shape_raises(self) -> None:
+        with pytest.raises(ValueError, match="adjacency must be"):
+            network_from_adjacency(NODES, np.zeros((3, 3), dtype=np.int64))
+
+    def test_duplicate_labels_raise(self) -> None:
+        with pytest.raises(ValueError, match="unique"):
+            network_from_adjacency(("A", "A"), np.zeros((2, 2), dtype=np.int64))
+
+    def test_self_loop_on_diagonal_raises(self) -> None:
+        matrix = np.zeros((4, 4), dtype=np.int64)
+        matrix[2, 2] = 1
+        with pytest.raises(ValueError, match="self-loops"):
+            network_from_adjacency(NODES, matrix)
+
+
+class TestCascadeSourceHandling:
+    def test_generator_sources_are_materialized(self) -> None:
+        """A generator must not be consumed by the emptiness check."""
+        net = build_network(NODES, EDGES)
+        result = cascade_coverage(net, (label for label in ("US",)), 1.0)
+        assert result.seeded == ("US",)
+        assert result.coverage_fraction == pytest.approx(1.0)
+
+    def test_empty_generator_raises(self) -> None:
+        net = build_network(NODES, EDGES)
+        with pytest.raises(ValueError, match="at least one source"):
+            cascade_coverage(net, (label for label in ()), 1.0)
+
+
+class TestBetweennessDegenerateSizes:
+    def test_single_node_network(self) -> None:
+        net = build_network(("US",), ())
+        assert betweenness_centrality(net).scores == {"US": 0.0}
+
+    def test_two_node_network_is_not_normalized(self) -> None:
+        """With n == 2 the (n-1)(n-2) normalizer is 0, so raw scores stand."""
+        net = build_network(("US", "UK"), (("US", "UK"),))
+        scores = betweenness_centrality(net).scores
+        assert scores == {"US": 0.0, "UK": 0.0}

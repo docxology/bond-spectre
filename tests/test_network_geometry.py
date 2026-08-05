@@ -150,3 +150,25 @@ class TestCriticalNodeOrder:
     def test_k_zero(self) -> None:
         _, adj = build_adjacency(("A", "B"), (("A", "B"),))
         assert critical_node_order(adj, k=0) == []
+
+
+class TestBuildAdjacencyErrorBranches:
+    def test_unknown_first_endpoint_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown node 'Z'"):
+            build_adjacency(("A", "B"), (("Z", "A"),))
+
+    def test_unknown_second_endpoint_raises(self) -> None:
+        with pytest.raises(ValueError, match="unknown node 'Z'"):
+            build_adjacency(("A", "B"), (("A", "Z"),))
+
+
+class TestEfficiencyOnDisconnectedGraph:
+    def test_unreachable_pairs_contribute_nothing(self) -> None:
+        """Two isolated dyads: only within-dyad pairs are reachable."""
+        _, adj = build_adjacency(("A", "B", "C", "D"), (("A", "B"), ("C", "D")))
+        # 4 reachable ordered pairs at distance 1, out of n*(n-1) = 12.
+        assert network_efficiency(adj) == pytest.approx(4.0 / 12.0)
+
+    def test_fully_isolated_graph_has_zero_efficiency(self) -> None:
+        _, adj = build_adjacency(("A", "B", "C"), ())
+        assert network_efficiency(adj) == 0.0

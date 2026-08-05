@@ -87,6 +87,9 @@ def simulate_compromise(
     leadership_hit = bool(compromised & leadership)
     steps_to_leadership = 0 if leadership_hit else None
 
+    # Termination: every pass either breaks or adds at least one operative to
+    # `compromised`, which is bounded by the organisation size — so the loop
+    # runs at most len(org.operatives) times and needs no round cap.
     rounds = 0
     while True:
         rounds += 1
@@ -104,11 +107,7 @@ def simulate_compromise(
             steps_to_leadership = rounds
         if len(compromised) == len(org.operatives):
             break
-        if rounds >= len(org.operatives) + 1:
-            break
 
-    if steps_to_leadership is None and (compromised & leadership):
-        steps_to_leadership = rounds
     return CompromiseResult(
         compromised=frozenset(compromised),
         steps=rounds,
@@ -157,10 +156,12 @@ def expected_damage(
         result = simulate_compromise(org, seeds, turn_probability, seed=seed + trial)
         fractions.append(result.fraction)
         steps.append(result.steps)
-        if result.leadership_hit:
+        # `steps_to_leadership is not None` is exactly `leadership_hit`
+        # (simulate_compromise sets both together); using the optional as the
+        # marker avoids a second branch that could never be False.
+        if result.steps_to_leadership is not None:
             leadership_hits += 1
-            if result.steps_to_leadership is not None:
-                leadership_steps.append(result.steps_to_leadership)
+            leadership_steps.append(result.steps_to_leadership)
     mean_leadership_steps = sum(leadership_steps) / len(leadership_steps) if leadership_steps else 0.0
     return {
         "mean_fraction": float(np.mean(fractions)),

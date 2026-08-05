@@ -5,7 +5,7 @@ One folder per skill. Each ships `AGENTS.md`, `README.md`, `SKILL.md`.
 
 | Skill | Purpose |
 | --- | --- |
-| [`spectre/`](spectre/AGENTS.md) | Drive this exemplar end-to-end. |
+| [`spectre/`](spectre/AGENTS.md) | Drive this package end-to-end. |
 
 ## Skill contract
 

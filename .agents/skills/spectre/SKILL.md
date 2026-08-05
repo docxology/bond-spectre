@@ -1,10 +1,10 @@
 ---
 name: spectre
-description: BOND film package (Spectre 2015) — Nine Eyes surveillance-network centralization, SPECTRE org cell model, network geometry.
+description: BOND film package (Spectre 2015) — Nine Eyes surveillance-network centralization, SPECTRE org cell model, network geometry, traffic interception, compromise cascades, sensor-placement cover.
 version: 0.1.0
 author: docxology
 license: MIT
-tags: [bond, spectre, nine-eyes, surveillance-network, org-intel, network-geometry]
+tags: [bond, spectre, nine-eyes, surveillance-network, org-intel, network-geometry, traffic-intel, infiltration, signal-cover]
 ---
 
 # spectre
@@ -37,10 +37,15 @@ uv run python scripts/z_generate_manuscript_variables.py   # hydrate tokens (las
 
 ## Structure
 
-- **Pure core (numpy+stdlib, no bond_api):** `src/spectre/surveillance_net.py`
-  (data-flow centralization, cascade coverage),
-  `src/spectre/org_intel.py` (hierarchy + cell compartmentalization),
-  `src/spectre/network_geometry.py` (connectivity + critical nodes).
+- **Pure core (numpy+stdlib, no bond_api), six modules:**
+  `src/spectre/surveillance_net.py` (data-flow centralization, betweenness,
+  cascade coverage), `src/spectre/org_intel.py` (hierarchy + cell
+  compartmentalization + exposure), `src/spectre/network_geometry.py`
+  (connectivity, articulation points, critical nodes),
+  `src/spectre/traffic_intel.py` (volume-weighted interception, greedy
+  submodular monitoring budget), `src/spectre/infiltration.py` (compromise
+  cascade, expected damage), `src/spectre/signal_cover.py` (greedy set cover,
+  coverage redundancy).
 - **Adapter:** `src/spectre/mission.py` — FROZEN `MissionProvider`, canonical
   NINE EYES dataset, `register_gadgets`.
 - **Hydration:** `src/spectre/manuscript_variables.py` — `{{TOKEN}}`s from
@@ -52,10 +57,13 @@ uv run python scripts/z_generate_manuscript_variables.py   # hydrate tokens (las
 ## Pitfalls
 
 - **Keep the pure core bond_api-free.** Only `mission.py` imports `bond_api`;
-  the three domain modules must stay importable standalone.
+  the six domain modules must stay importable standalone
+  (`tests/test_domain_isolation.py` proves it in a subprocess).
 - **No mocks.** All tests use real data structures and computation.
-- **Deterministic.** Fixed seed, no wall-clock in persisted artifacts
-  (`Provenance.wall_time_s == 0.0`).
+- **Deterministic.** Fixed seeds, label-ordered greedy tie-breaks, no
+  wall-clock in persisted artifacts (`Provenance.wall_time_s == 0.0`).
+- **Frozen surface.** `MissionProvider`, `PROVIDER` and `register_gadgets` are
+  consumed across packages — deepen inside them, never re-shape them.
 - **Metrics flow, never hardcode.** Every number in the manuscript comes from
   `manuscript_variables.generate_variables()` reading the measured mission
   `execute()` output — do not hand-author metrics in prose.
@@ -65,6 +73,6 @@ uv run python scripts/z_generate_manuscript_variables.py   # hydrate tokens (las
 ## Cross-refs
 
 - Root `AGENTS.md` — authoritative agent rulebook.
-- `docs/architecture.md`, `docs/testing_philosophy.md`,
+- `docs/AGENTS.md`, `docs/architecture.md`, `docs/testing_philosophy.md`,
   `docs/agent_instructions.md`.
 - `TODO.md` — build log + declared integration points.

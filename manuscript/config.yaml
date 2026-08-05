@@ -7,7 +7,7 @@
 paper:
   # RASP Standard: Title must be descriptive and objective
   title: "Spectre: NINE EYES — Special-Agent Mission Software"
-  subtitle: "Surveillance-Network Centralization, Criminal-Org Cell Structure, and Critical-Node Geometry"
+  subtitle: "Surveillance-Network Centralization, Criminal-Org Cell Structure, Critical-Node Geometry, Budgeted Interception, Compromise Cascades, and Sensor-Placement Cover"
   version: "0.1.0"
   date: "2026-08-04" # Auto-generated via infrastructure validator if empty
 
@@ -34,10 +34,15 @@ keywords:
   - "network geometry"
   - "critical nodes"
   - "cascade coverage"
+  - "betweenness centrality"
+  - "articulation points"
   - "traffic interception"
+  - "submodular maximization"
   - "compromise cascade"
+  - "network percolation"
   - "sensor-placement set cover"
-  - "active inference"
+  - "coverage redundancy"
+  - "deterministic reproducibility"
 
 metadata:
   license: "MIT"

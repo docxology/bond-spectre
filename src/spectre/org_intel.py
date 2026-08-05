@@ -99,7 +99,7 @@ def build_org(
             raise ValueError(f"unknown operative {member!r} in cell_of")
         if not isinstance(cell, str) or not cell.strip():
             raise ValueError(f"cell id for {member!r} must be a non-empty string")
-    resolved_cells = {member: cell for member, cell in cell_of.items()}
+    resolved_cells = dict(cell_of)
 
     resolved_parents: dict[str, str | None] = {}
     for member, parent in parent_of.items():
@@ -153,7 +153,11 @@ def hierarchy_stats(brotherhood: Brotherhood) -> HierarchyStats:
         for i, node in enumerate(reversed(path)):
             depth[node] = offset + i + 1
             order.append(node)
-    reachable = sum(1 for m in operatives if m in depth)
+    # Reachability is a real BFS from the apex down the command tree, not
+    # "was a depth computed for this operative": a malformed org with a
+    # command cycle and no apex assigns depths to everyone but is reachable
+    # from nobody, and chain_complete must not claim otherwise.
+    reachable = len(command_reachability(brotherhood))
     return HierarchyStats(
         depth=depth,
         height=max(depth.values(), default=0),
@@ -182,17 +186,13 @@ def compartmentalization(brotherhood: Brotherhood) -> float:
     """
     members = brotherhood.operatives
     cell_of = brotherhood.cell_of
-    same_cell: dict[str, set[str]] = {}
-    for member in members:
-        cell = cell_of.get(member, NO_CELL)
-        same_cell.setdefault(cell, set()).add(member)
 
     cross_pairs = 0
     linked_cross_pairs = 0
     for i in range(len(members)):
         for j in range(i + 1, len(members)):
             a, b = members[i], members[j]
-            if same_cell.get(cell_of.get(a, NO_CELL)) == same_cell.get(cell_of.get(b, NO_CELL)):
+            if cell_of.get(a, NO_CELL) == cell_of.get(b, NO_CELL):
                 continue
             cross_pairs += 1
             linked = brotherhood.parent_of.get(a) == b or brotherhood.parent_of.get(b) == a

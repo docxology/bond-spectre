@@ -1,6 +1,6 @@
 # spectre skill — AGENTS.md
 
-Project-scoped skill bundle for the `spectre` exemplar.
+Project-scoped skill bundle for the `spectre` package.
 
 | File | Purpose |
 | --- | --- |
@@ -12,8 +12,7 @@ Project-scoped skill bundle for the `spectre` exemplar.
 
 Agents that need to:
 
-- Drive the in-repo exemplar end-to-end.
-- Fork this exemplar as a starting scaffold.
+- Drive the package end-to-end (mission CLIs, gates, regeneration).
 - Verify layer boundaries and thin-orchestrator contracts.
 
 ## Cross-refs

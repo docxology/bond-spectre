@@ -7,11 +7,15 @@ from pathlib import Path
 
 import pytest
 
+from bond_api.protocol import MissionBrief, MissionOutcome, MissionPlan, Provenance
+
 from spectre.manuscript_variables import (
+    domain_module_names,
     generate_variables,
     load_manuscript_config,
     resolve_manuscript_tree,
 )
+from spectre.mission import PROVIDER, gadget_names
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 MANUSCRIPT_DIR = PACKAGE_ROOT / "manuscript"
@@ -92,3 +96,68 @@ class TestResolveTree:
         (manuscript / "00_sample.md").write_text("uses {{UNKNOWN_TOKEN_HERE}} in prose", encoding="utf-8")
         with pytest.raises(ValueError):
             resolve_manuscript_tree({"KNOWN": "x"}, manuscript_dir=manuscript)
+
+
+class _EmptyMission:
+    """A real (non-mock) mission runner that measures nothing.
+
+    Implements the same brief/plan/execute surface as the NINE EYES provider
+    using the genuine ``bond_api`` protocol types, so the strict measured-
+    metrics gate in ``generate_variables`` can actually be exercised instead
+    of being green by construction.
+    """
+
+    def brief(self) -> MissionBrief:
+        return MissionBrief(
+            film="spectre",
+            codename="NINE EYES",
+            objectives=("run a mission that measures nothing",),
+        )
+
+    def plan(self, brief: MissionBrief) -> MissionPlan:
+        return MissionPlan(steps=())
+
+    def execute(self, plan: MissionPlan) -> MissionOutcome:
+        return MissionOutcome(
+            success=True,
+            results={},
+            provenance=Provenance(package_version="0.0.0", seed=0, input_hash="0" * 64, wall_time_s=0.0),
+        )
+
+
+class TestStrictMetricsGate:
+    def test_strict_mode_rejects_an_unmeasured_mission(self) -> None:
+        with pytest.raises(ValueError, match="no measured metrics"):
+            generate_variables(provider=_EmptyMission())
+
+    def test_draft_mode_still_requires_the_measured_keys(self) -> None:
+        """--allow-draft relaxes the gate, it does not invent metrics."""
+        with pytest.raises(KeyError):
+            generate_variables(require_outputs=False, provider=_EmptyMission())
+
+    def test_bad_paper_section_raises(self, tmp_path: Path) -> None:
+        bad = tmp_path / "config.yaml"
+        bad.write_text("paper: not-a-mapping\nkeywords: []\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="'paper' section"):
+            generate_variables(config_path=bad)
+
+
+class TestMeasuredInventories:
+    def test_domain_modules_are_read_from_disk(self) -> None:
+        names = domain_module_names()
+        assert set(names) == {
+            "infiltration",
+            "network_geometry",
+            "org_intel",
+            "signal_cover",
+            "surveillance_net",
+            "traffic_intel",
+        }
+        assert "mission" not in names
+        assert "manuscript_variables" not in names
+
+    def test_inventory_tokens_match_the_inventories(self) -> None:
+        variables = generate_variables()
+        assert int(variables["SPECTRE_NUM_DOMAIN_MODULES"]) == len(domain_module_names())
+        assert int(variables["SPECTRE_NUM_GADGETS"]) == len(gadget_names())
+        assert int(variables["SPECTRE_PLAN_STEPS"]) == len(PROVIDER.plan(PROVIDER.brief()).steps)

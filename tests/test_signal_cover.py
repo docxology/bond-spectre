@@ -133,3 +133,37 @@ class TestCanonical:
         assert set(covered) == set(problem.targets)
         assert len(selected) <= 4
         assert 0.0 < redundancy_index(problem, selected) < 1.0
+
+
+class TestGreedyCoverExhaustion:
+    def test_stops_when_no_agency_adds_a_target(self) -> None:
+        """An unreachable target cannot be covered: greedy must stop, not spin."""
+        problem = build_coverage(
+            ("A", "B"),
+            ("t1", "t2", "unreachable"),
+            {"A": ("t1",), "B": ("t2",)},
+        )
+        selected, covered = greedy_set_cover(problem)
+        assert selected == ("A", "B")
+        assert covered == frozenset({"t1", "t2"})
+        assert uncovered_targets(problem, selected) == ("unreachable",)
+
+    def test_agency_covering_nothing_is_never_selected(self) -> None:
+        problem = build_coverage(("A", "idle"), ("t1",), {"A": ("t1",), "idle": ()})
+        selected, covered = greedy_set_cover(problem)
+        assert selected == ("A",)
+        assert covered == frozenset({"t1"})
+
+
+class TestGreedyBreaksOnZeroGain:
+    def test_break_when_remaining_agencies_add_nothing(self) -> None:
+        """Agencies remain, but none can add a target: greedy breaks out."""
+        problem = build_coverage(
+            ("A", "idle"),
+            ("t1", "unreachable"),
+            {"A": ("t1",), "idle": ()},
+        )
+        selected, covered = greedy_set_cover(problem)
+        assert selected == ("A",)
+        assert covered == frozenset({"t1"})
+        assert uncovered_targets(problem, selected) == ("unreachable",)

@@ -144,18 +144,17 @@ def greedy_set_cover(
     covered: set[int] = set()
     remaining = sorted(range(len(problem.agencies)), key=lambda i: problem.agencies[i])
     selected: list[str] = []
+
+    def marginal_gain(agency_index: int) -> int:
+        return sum(1 for target in np.flatnonzero(problem.matrix[agency_index]) if int(target) not in covered)
+
     while len(covered) < required_count and remaining:
-        best_index: int | None = None
-        best_gain = -1
-        for agency_index in remaining:
-            gain = 0
-            for target in np.flatnonzero(problem.matrix[agency_index]):
-                if int(target) not in covered:
-                    gain += 1
-            if gain > best_gain:
-                best_gain = gain
-                best_index = agency_index
-        if best_index is None or best_gain <= 0:
+        # `remaining` is non-empty (loop condition), so max() always has a
+        # candidate; ties break by agency label because `remaining` is sorted
+        # by label and max() keeps the first maximal element.
+        gains = {agency_index: marginal_gain(agency_index) for agency_index in remaining}
+        best_index = max(remaining, key=lambda agency_index: gains[agency_index])
+        if gains[best_index] <= 0:
             break
         selected.append(problem.agencies[best_index])
         remaining.remove(best_index)

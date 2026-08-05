@@ -83,6 +83,7 @@ __all__ = [
     "SPECTRE_PARENT_OF",
     "SPECTRE_LEADERSHIP",
     "register_gadgets",
+    "gadget_names",
 ]
 
 #: Deterministic RNG seed for any stochastic component (cascade activation).
@@ -320,6 +321,28 @@ class MissionProvider:  # noqa: N801 — class name is fixed by the discovery co
         )
 
 
+#: Q-branch gadget table: gadget name -> the pure-core callable it exposes.
+#: Private so the package's public registration surface stays exactly
+#: ``register_gadgets`` (what the coordinator and CLI consume).
+_GADGETS: dict[str, object] = {
+    "surveillance_centralization": group_centralization,
+    "org_compartmentalization": compartmentalization,
+    "geometry_efficiency": network_efficiency,
+    "traffic_interception": monitor_allocation,
+    "infiltration_damage": expected_damage,
+    "signal_set_cover": greedy_set_cover,
+}
+
+
+def gadget_names() -> tuple[str, ...]:
+    """Sorted names of the gadgets :func:`register_gadgets` publishes.
+
+    Measured from the same table the registration uses, so a manuscript or doc
+    count of gadgets cannot drift from what is actually registered.
+    """
+    return tuple(sorted(_GADGETS))
+
+
 def register_gadgets(registry: GadgetRegistry) -> GadgetRegistry:
     """Register the NINE EYES analysis gadgets with a ``bond_api`` registry.
 
@@ -329,17 +352,7 @@ def register_gadgets(registry: GadgetRegistry) -> GadgetRegistry:
     Returns:
         The same registry (for chaining).
     """
-    registry.register(
-        "spectre",
-        {
-            "surveillance_centralization": group_centralization,
-            "org_compartmentalization": compartmentalization,
-            "geometry_efficiency": network_efficiency,
-            "traffic_interception": monitor_allocation,
-            "infiltration_damage": expected_damage,
-            "signal_set_cover": greedy_set_cover,
-        },
-    )
+    registry.register("spectre", dict(_GADGETS))
     return registry
 
 

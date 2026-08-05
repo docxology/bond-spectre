@@ -126,3 +126,25 @@ class TestMonitorAllocation:
         # Marginal gain shrinks: hub alone captures most of the traffic.
         _, one = monitor_allocation(net, 1)
         assert one > 0.7
+
+
+class TestInterceptionOnInboundLinks:
+    def test_monitoring_a_pure_sink_captures_its_inbound_traffic(self) -> None:
+        """A leaf agency only has in-links; monitoring it must still intercept."""
+        network = build_traffic_network(
+            ("A", "B", "C"),
+            (("A", "B", 30.0), ("A", "C", 70.0)),
+        )
+        assert interception_coverage(network, ("B",)) == pytest.approx(0.3)
+        assert interception_coverage(network, ("C",)) == pytest.approx(0.7)
+        assert interception_coverage(network, ("B", "C")) == pytest.approx(1.0)
+
+    def test_ties_break_by_agency_label_not_node_order(self) -> None:
+        """Two agencies with identical marginal gain: the lower label wins."""
+        network = build_traffic_network(
+            ("zulu", "alpha", "x", "y"),
+            (("zulu", "x", 50.0), ("alpha", "y", 50.0)),
+        )
+        selected, coverage = monitor_allocation(network, budget=1)
+        assert selected == ("alpha",)
+        assert coverage == pytest.approx(0.5)

@@ -17,7 +17,7 @@ import platform
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import yaml
 
@@ -27,10 +27,17 @@ from spectre.mission import (
     NINE_EYES_NODES,
     PROVIDER,
     SPECTRE_OPERATIVES,
+    gadget_names,
 )
 from spectre.network_geometry import build_adjacency, articulation_points
 
-__all__ = ["generate_variables", "load_manuscript_config", "resolve_manuscript_tree"]
+__all__ = [
+    "MissionRunner",
+    "domain_module_names",
+    "generate_variables",
+    "load_manuscript_config",
+    "resolve_manuscript_tree",
+]
 
 # .../spectre/src/spectre/manuscript_variables.py -> parents[2] == project root
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
@@ -51,9 +58,43 @@ def load_manuscript_config(config_path: str | Path | None = None) -> dict[str, A
     return data
 
 
-def _network_metrics() -> dict[str, Any]:
+class MissionRunner(Protocol):
+    """The slice of the FROZEN ``MissionProvider`` this module actually drives.
+
+    Declaring it as a Protocol keeps the strict measured-metrics gate below
+    *testable*: a test can pass a real alternative runner that returns an empty
+    result set, instead of the gate being green by construction because the
+    canonical provider can never fail it.
+    """
+
+    def brief(self) -> Any:
+        """Return the mission brief."""
+
+    def plan(self, brief: Any) -> Any:
+        """Return the mission plan for a brief."""
+
+    def execute(self, plan: Any) -> Any:
+        """Return the mission outcome for a plan."""
+
+
+#: Modules of the pure, bond-api-free domain core (everything in the package
+#: except the protocol adapter, the hydration layer and the figures subpackage).
+_NON_DOMAIN_MODULES = frozenset({"__init__", "mission", "manuscript_variables"})
+
+
+def domain_module_names() -> tuple[str, ...]:
+    """Names of the pure domain modules, measured from the installed package.
+
+    Derived by listing the package directory rather than from a hand-kept
+    constant, so the manuscript's module count cannot drift from the code.
+    """
+    package_dir = Path(__file__).resolve().parent
+    return tuple(sorted(path.stem for path in package_dir.glob("*.py") if path.stem not in _NON_DOMAIN_MODULES))
+
+
+def _network_metrics(provider: MissionRunner) -> dict[str, Any]:
     """Run the deterministic mission and copy its measured results."""
-    outcome = PROVIDER.execute(PROVIDER.plan(PROVIDER.brief()))
+    outcome = provider.execute(provider.plan(provider.brief()))
     return dict(outcome.results)
 
 
@@ -61,20 +102,28 @@ def generate_variables(
     *,
     config_path: str | Path | None = None,
     require_outputs: bool = True,
+    provider: MissionRunner | None = None,
 ) -> dict[str, str]:
     """Compute the ``{{TOKEN}}`` → value mapping for the manuscript.
 
     Args:
         config_path: Override for ``manuscript/config.yaml``.
-        require_outputs: When True (default), verify the mission produced a
-            success outcome — the strict-mode gate.
+        require_outputs: When True (default), verify the mission produced
+            measured metrics — the strict-mode gate.
+        provider: Mission runner to measure; defaults to the canonical NINE
+            EYES ``PROVIDER``. Injectable so the strict gate can be exercised.
+
+    Raises:
+        ValueError: If the config ``paper`` section is not a mapping, or (in
+            strict mode) the mission produced no measured metrics.
     """
     config = load_manuscript_config(config_path)
     paper = config.get("paper", {})
     if not isinstance(paper, dict):
         raise ValueError("manuscript config 'paper' section must be a mapping")
 
-    metrics = _network_metrics()
+    runner: MissionRunner = PROVIDER if provider is None else provider
+    metrics = _network_metrics(runner)
     if require_outputs and not metrics.get("plan_steps"):
         raise ValueError("mission produced no measured metrics — cannot hydrate manuscript")
 
@@ -107,10 +156,15 @@ def generate_variables(
         "SPECTRE_NUM_ARTICULATION_POINTS": str(len(articulation_labels)),
         "SPECTRE_ARTICULATION_NODES": ", ".join(articulation_labels),
         "SPECTRE_CRITICAL_NODES": critical,
-        "SPECTRE_NUM_OBJECTIVES": str(len(PROVIDER.brief().objectives)),
+        "SPECTRE_NUM_OBJECTIVES": str(len(runner.brief().objectives)),
+        "SPECTRE_NUM_DOMAIN_MODULES": str(len(domain_module_names())),
+        "SPECTRE_DOMAIN_MODULES": ", ".join(domain_module_names()),
+        "SPECTRE_NUM_GADGETS": str(len(gadget_names())),
+        "SPECTRE_PLAN_STEPS": str(metrics["plan_steps"]),
         "SPECTRE_TRAFFIC_TOTAL": f"{metrics['traffic_total']:.1f}",
         "SPECTRE_TRAFFIC_TOP_LINK": str(metrics["traffic_top_link"]),
         "SPECTRE_MONITOR_ALLOCATION": monitor_allocation,
+        "SPECTRE_MONITOR_BUDGET": str(len(metrics["monitor_allocation"])),
         "SPECTRE_MONITOR_COVERAGE": f"{metrics['monitor_coverage_budget3']:.4f}",
         "SPECTRE_COMPROMISE_FRACTION": f"{metrics['expected_compromise_fraction']:.4f}",
         "SPECTRE_LEADERSHIP_HIT_RATE": f"{metrics['leadership_hit_rate']:.2f}",

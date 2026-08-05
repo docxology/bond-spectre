@@ -32,6 +32,7 @@ __all__ = [
     "CentralityResult",
     "CascadeResult",
     "build_network",
+    "network_from_adjacency",
     "out_degree_centrality",
     "in_degree_centrality",
     "group_centralization",
@@ -81,13 +82,49 @@ class CascadeResult:
     coverage_fraction: float
 
 
-def _validate_adjacency(adjacency: np.ndarray, n_nodes: int, nodes: Sequence[str]) -> None:
+def _validate_adjacency(adjacency: np.ndarray, nodes: Sequence[str]) -> None:
+    """Validate a caller-supplied adjacency matrix against its node labels.
+
+    Raises:
+        ValueError: If the matrix is not square with one row per node, node
+            labels repeat, or the matrix carries a self-loop on the diagonal.
+    """
+    n_nodes = len(nodes)
     if adjacency.shape != (n_nodes, n_nodes):
         raise ValueError(f"adjacency must be {n_nodes}x{n_nodes}, got {adjacency.shape}")
     if len(set(nodes)) != n_nodes:
         raise ValueError("node labels must be unique")
     if np.any(np.diag(adjacency)):
         raise ValueError("self-loops are not allowed in a surveillance network")
+
+
+def network_from_adjacency(
+    nodes: Sequence[str],
+    adjacency: np.ndarray,
+) -> SurveillanceNetwork:
+    """Build a :class:`SurveillanceNetwork` from an existing adjacency matrix.
+
+    The edge-list constructor :func:`build_network` enforces its invariants as
+    it fills the matrix; this constructor accepts a matrix that was produced
+    elsewhere (a slice, a transpose, a loaded artifact) and therefore has to
+    validate it explicitly.
+
+    Args:
+        nodes: Unique agency labels, aligned with the matrix rows/columns.
+        adjacency: Square matrix; ``adjacency[i, j] != 0`` is the flow
+            ``i -> j``.
+
+    Returns:
+        A validated network (the matrix is copied, so the result is immutable
+        with respect to the caller's array).
+
+    Raises:
+        ValueError: If the matrix is not square with one row per node, node
+            labels repeat, or the diagonal carries a self-loop.
+    """
+    ordered = tuple(nodes)
+    _validate_adjacency(adjacency, ordered)
+    return SurveillanceNetwork(nodes=ordered, adjacency=np.array(adjacency, copy=True))
 
 
 def build_network(
@@ -121,7 +158,10 @@ def build_network(
         if source == target:
             raise ValueError("self-loops are not allowed in a surveillance network")
         adjacency[index[source], index[target]] = 1
-    _validate_adjacency(adjacency, n, ordered)
+    # The loop above already enforces every invariant _validate_adjacency
+    # checks (uniqueness, squareness, no self-loop), so re-checking here would
+    # be a gate that cannot fail. Matrix-sourced networks go through
+    # network_from_adjacency, which validates for real.
     return SurveillanceNetwork(nodes=ordered, adjacency=adjacency)
 
 
@@ -215,9 +255,11 @@ def betweenness_centrality(network: SurveillanceNetwork) -> CentralityResult:
             for p in preds[node]:
                 sigma[node] += sigma[p]
         for node in sorted(reachable, key=lambda i: dist[i], reverse=True):
+            # Every node in `reachable` has at least one shortest path from
+            # the source, so sigma[node] >= 1 — no zero-division guard here
+            # (a guard that can never fire would only hide a real regression).
             for p in preds[node]:
-                if sigma[node] > 0:
-                    delta[p] += (sigma[p] / sigma[node]) * (1.0 + delta[node])
+                delta[p] += (sigma[p] / sigma[node]) * (1.0 + delta[node])
             if node != source:
                 centrality[node] += delta[node]
     if n > 1:
@@ -284,17 +326,18 @@ def cascade_coverage(
     """
     if not 0.0 < activation_prob <= 1.0:
         raise ValueError("activation_prob must be in (0, 1]")
-    if not sources:
+    # Materialize first: `sources` is an Iterable, so a generator would be
+    # emptied by the emptiness check and silently seed nothing.
+    requested = tuple(sources)
+    if not requested:
         raise ValueError("at least one source agency is required")
     index = network.nodes  # tuple of labels
     label_to_i = {label: i for i, label in enumerate(index)}
     rng = np.random.default_rng(0)  # fixed seed -> deterministic cascade
-    active = np.zeros(network.n, dtype=bool)
-    for label in sources:
+    for label in requested:
         if label not in label_to_i:
             raise ValueError(f"unknown source agency {label!r}")
-        active[label_to_i[label]] = True
-    seeds = tuple(sorted(set(sources)))
+    seeds = tuple(sorted(set(requested)))
     frontier = [label_to_i[label] for label in seeds]
     activated: set[int] = set(frontier)
     while frontier:

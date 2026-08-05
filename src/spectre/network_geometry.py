@@ -194,8 +194,10 @@ def network_efficiency(adjacency: np.ndarray) -> float:
         for j in range(n):
             if i == j:
                 continue
+            # d is None for unreachable pairs; for i != j a reachable pair
+            # always has d >= 1, so no zero-division guard is needed here.
             d = lengths[i].get(j)
-            if d is not None and d > 0:
+            if d is not None:
                 total += 1.0 / d
     return float(total / (n * (n - 1)))
 

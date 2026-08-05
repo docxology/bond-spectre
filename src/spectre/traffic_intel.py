@@ -197,7 +197,9 @@ def monitor_allocation(network: TrafficNetwork, budget: int) -> tuple[tuple[str,
     """Greedy budgeted allocation of monitoring agencies.
 
     At each step picks the not-yet-chosen agency whose addition intercepts the
-    most *new* traffic (marginal gain); ties break by agency label. This is the
+    most *new* traffic (marginal gain); candidates are scanned in sorted label
+    order, so ties break by agency label regardless of how ``network.nodes``
+    happens to be ordered. This is the
     classic greedy heuristic for monotone submodular coverage maximization
     (Nemhauser–Wolsey–Fisher), so for a budget of ``b`` agencies the achieved
     coverage is at least ``(1 - 1/e)`` of the optimal ``b``-agency coverage.
@@ -219,28 +221,31 @@ def monitor_allocation(network: TrafficNetwork, budget: int) -> tuple[tuple[str,
     total = total_traffic(network)
     if total <= 0 or budget == 0 or not nodes:
         return (), 0.0
-    remaining = list(nodes)
+    remaining = sorted(nodes)
     selected: list[str] = []
     covered: set[tuple[int, int]] = set()
     index = {label: i for i, label in enumerate(nodes)}
+
+    def marginal_gain(label: str) -> float:
+        node = index[label]
+        gain = 0.0
+        for raw in np.flatnonzero(network.traffic[node]):
+            link = (node, int(raw))
+            if link not in covered:
+                gain += float(network.traffic[link])
+        for raw in np.flatnonzero(network.traffic[:, node]):
+            link = (int(raw), node)
+            if link not in covered:
+                gain += float(network.traffic[link])
+        return gain
+
     for _ in range(min(budget, len(nodes))):
-        best: str | None = None
-        best_gain = -1.0
-        for label in remaining:
-            node = index[label]
-            gain = 0.0
-            for raw in np.flatnonzero(network.traffic[node]):
-                link = (node, int(raw))
-                if link not in covered:
-                    gain += float(network.traffic[link])
-            for raw in np.flatnonzero(network.traffic[:, node]):
-                link = (int(raw), node)
-                if link not in covered:
-                    gain += float(network.traffic[link])
-            if gain > best_gain:
-                best_gain = gain
-                best = label
-        if best is None or best_gain <= 0:
+        # `remaining` is non-empty here (the loop runs at most len(nodes)
+        # times and each pass removes one agency), so max() always has a
+        # candidate — no unreachable "nothing selected" guard.
+        gains = {label: marginal_gain(label) for label in remaining}
+        best = max(remaining, key=lambda label: gains[label])
+        if gains[best] <= 0:
             break
         selected.append(best)
         remaining.remove(best)
