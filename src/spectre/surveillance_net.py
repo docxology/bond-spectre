@@ -23,6 +23,7 @@ only, deterministic, and importable without ``bond-api``.
 
 from __future__ import annotations
 
+import math
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Iterable, Sequence
@@ -207,7 +208,12 @@ def group_centralization(scores: dict[str, float], *, maximum_score: float | Non
     """
     if not scores:
         raise ValueError("scores must not be empty")
-    values = list(scores.values())
+    values = [float(value) for value in scores.values()]
+    for value in values:
+        if not math.isfinite(value):
+            raise ValueError("scores must all be finite")
+    if maximum_score is not None and not math.isfinite(float(maximum_score)):
+        raise ValueError("maximum_score must be finite")
     cap = maximum_score if maximum_score is not None else max(values)
     if cap <= 0:
         raise ValueError("maximum_score must be positive")
@@ -289,10 +295,14 @@ def herfindahl_index(values: Sequence[float]) -> float:
     """
     if not values:
         raise ValueError("values must not be empty")
-    total = float(sum(values))
+    floats = [float(value) for value in values]
+    for value in floats:
+        if not math.isfinite(value):
+            raise ValueError("values must all be finite")
+    total = sum(floats)
     if total <= 0:
         raise ValueError("values must sum to a positive total")
-    return float(sum((value / total) ** 2 for value in values))
+    return float(sum((value / total) ** 2 for value in floats))
 
 
 def data_share_centrality(network: SurveillanceNetwork) -> CentralityResult:

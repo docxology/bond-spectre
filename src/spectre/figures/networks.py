@@ -12,13 +12,18 @@ from pathlib import Path
 
 import numpy as np
 
+from spectre.org_intel import Brotherhood, exposure
 from spectre.surveillance_net import (
     SurveillanceNetwork,
     betweenness_centrality,
     out_degree_centrality,
 )
 
-__all__ = ["flow_figure_title", "plot_network_flow_centralization"]
+__all__ = [
+    "flow_figure_title",
+    "plot_network_flow_centralization",
+    "plot_brotherhood_cascade",
+]
 
 
 def _project_root() -> Path:
@@ -155,6 +160,142 @@ def plot_network_flow_centralization(
     ax.set_aspect("equal")
     ax.axis("off")
     fig.tight_layout()
+    fig.savefig(path, dpi=dpi, bbox_inches="tight")
+    plt.close(fig)
+    return path
+
+
+def plot_brotherhood_cascade(
+    org: Brotherhood,
+    seed_operative: str,
+    *,
+    output_path: str | Path | None = None,
+    dpi: int = 300,
+) -> Path:
+    """Render the SPECTRE command tree with one turn's exposure highlighted.
+
+    Draws the brotherhood's ``superior -> subordinate`` command edges on a
+    deterministic layered layout (depth is vertical, label order within a
+    depth is horizontal), colours each operative by cell, rings the turned
+    ``seed_operative``, and highlights the operatives its turn exposes
+    (cellmates plus direct superior and subordinates, computed live by
+    :func:`spectre.org_intel.exposure`). No randomness: the layout and the
+    exposure set are pure functions of the org, so the PNG is reproducible.
+
+    Args:
+        org: The brotherhood to draw.
+        seed_operative: The operative whose turn defines the exposed set.
+        output_path: Destination PNG; defaults to
+            ``output/figures/brotherhood_cascade.png``.
+        dpi: Raster resolution.
+
+    Returns:
+        The resolved output file path.
+
+    Raises:
+        ValueError: If the brotherhood is empty or ``seed_operative`` is not
+            a member.
+    """
+    import matplotlib.pyplot as plt
+
+    operatives = org.operatives
+    if not operatives:
+        raise ValueError("cannot plot an empty brotherhood")
+    if seed_operative not in set(operatives):
+        raise ValueError(f"unknown seed operative {seed_operative!r}")
+    leadership = org.leadership or {m for m in operatives if org.parent_of.get(m) is None}
+
+    # Per-operative command depth, walked up the superior chain (same rule the
+    # domain hierarchy_stats uses), so the vertical axis is the real depth.
+    depth: dict[str, int] = {}
+    for member in operatives:
+        if member in leadership or member not in org.parent_of:
+            depth[member] = 0
+            continue
+        walk: list[str] = []
+        cursor: str | None = member
+        seen: set[str] = set()
+        while cursor is not None and cursor not in depth:
+            if cursor in seen:
+                break
+            seen.add(cursor)
+            walk.append(cursor)
+            cursor = org.parent_of.get(cursor)
+        offset = depth.get(cursor, 0) if cursor is not None else 0
+        for i, node in enumerate(reversed(walk)):
+            depth[node] = offset + i + 1
+
+    # Deterministic horizontal order: label-sorted within each depth row.
+    by_depth: dict[int, list[str]] = {}
+    for member in operatives:
+        by_depth.setdefault(depth[member], []).append(member)
+    x_pos: dict[str, float] = {}
+    for _, members in by_depth.items():
+        members.sort()
+        for i, member in enumerate(members):
+            x_pos[member] = i - (len(members) - 1) / 2.0
+    y_pos = {member: -depth[member] for member in operatives}
+
+    cells = sorted({c for c in org.cell_of.values()})
+    palette: tuple[str, ...] = (
+        "#0f766e",
+        "#7c3aed",
+        "#b45309",
+        "#0e7490",
+        "#be185d",
+        "#15803d",
+        "#b91c1c",
+    )
+    cell_index = {cell: i for i, cell in enumerate(cells)}
+    exposed = exposure(org, seed_operative)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for member, superior in org.parent_of.items():
+        if superior is not None:
+            ax.annotate(
+                "",
+                xy=(x_pos[member], y_pos[member]),
+                xytext=(x_pos[superior], y_pos[superior]),
+                arrowprops=dict(arrowstyle="-|>", color="#334155", lw=1.0, shrinkA=18, shrinkB=18),
+            )
+    for member in operatives:
+        cell = org.cell_of.get(member)
+        colour = palette[cell_index[cell]] if (cell is not None and cell in cell_index) else "#94a3b8"
+        is_seed = member == seed_operative
+        is_exposed = member in exposed and not is_seed
+        ax.scatter(
+            [x_pos[member]],
+            [y_pos[member]],
+            s=620 if is_seed else 420,
+            color=colour,
+            edgecolors="#b45309" if is_seed else ("#7c3aed" if is_exposed else "white"),
+            linewidths=2.5 if (is_seed or is_exposed) else 1.0,
+            zorder=3,
+            alpha=0.9 if is_exposed else 1.0,
+        )
+        ax.text(
+            x_pos[member],
+            y_pos[member] + 0.16,
+            f"{member}{' *' if is_seed else ''}",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            zorder=4,
+        )
+    ax.set_title(
+        f"SPECTRE brotherhood (command tree; colour = cell). Turned {seed_operative} (*); "
+        f"{len(exposed)}-member exposure set highlighted (self, cellmates, superior, subordinates).",
+        fontsize=9,
+    )
+    ax.set_aspect("equal")
+    ax.axis("off")
+    fig.tight_layout()
+    path = (
+        Path(output_path)
+        if output_path is not None
+        else (_project_root() / "output" / "figures" / "brotherhood_cascade.png")
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return path

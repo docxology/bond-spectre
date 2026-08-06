@@ -84,14 +84,19 @@ described, remove it rather than ship it.
 
 ```markdown
 ![Caption text.](figures/network_flow_centralization.png){#fig:network_flow_centralization}
+![Caption text.](figures/brotherhood_cascade.png){#fig:brotherhood_cascade}
 ```
 
 | Figure | Generator | Referenced in |
 | --- | --- | --- |
 | `network_flow_centralization.png` | `src/spectre/figures/networks.py::plot_network_flow_centralization` | `03_results.md` |
+| `brotherhood_cascade.png` | `src/spectre/figures/networks.py::plot_brotherhood_cascade` | `03_results.md` |
 
 Paths are relative to the resolved manuscript in `output/manuscript/`; the
-figure must be generated before rendering or the reference dangles.
+figure must be generated before rendering or the reference dangles.  Both
+PNGs are mirrored into `output/manuscript/figures/` by
+`scripts/generate_figures.py`, and a test resolves every embedded path from the
+resolved tree to prove it.
 
 ## Equations
 

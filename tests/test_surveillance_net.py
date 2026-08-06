@@ -376,3 +376,31 @@ class TestBetweennessDegenerateSizes:
         net = build_network(("US", "UK"), (("US", "UK"),))
         scores = betweenness_centrality(net).scores
         assert scores == {"US": 0.0, "UK": 0.0}
+
+
+class TestFiniteValidation:
+    """NaN/inf must not propagate silently through the scalar metrics."""
+
+    def test_group_centralization_rejects_nan(self) -> None:
+        with pytest.raises(ValueError, match="finite"):
+            group_centralization({"a": float("nan"), "b": 1.0})
+
+    def test_group_centralization_rejects_inf(self) -> None:
+        with pytest.raises(ValueError, match="finite"):
+            group_centralization({"a": float("inf"), "b": 1.0})
+
+    def test_group_centralization_rejects_nan_maximum(self) -> None:
+        with pytest.raises(ValueError, match="finite"):
+            group_centralization({"a": 1.0, "b": 0.0}, maximum_score=float("nan"))
+
+    def test_herfindahl_rejects_nan(self) -> None:
+        with pytest.raises(ValueError, match="finite"):
+            herfindahl_index([1.0, float("nan")])
+
+    def test_herfindahl_rejects_inf(self) -> None:
+        with pytest.raises(ValueError, match="finite"):
+            herfindahl_index([1.0, float("inf")])
+
+    def test_valid_finite_inputs_still_work(self) -> None:
+        assert group_centralization({"a": 1.0, "b": 0.0}) == pytest.approx(1.0)
+        assert herfindahl_index([1.0, 1.0]) == pytest.approx(0.5)

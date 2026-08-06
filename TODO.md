@@ -162,3 +162,56 @@ grep -rn "template_code_project" . --exclude-dir=.git --exclude-dir=.venv --excl
 # 8. git status clean after your commit
 git status --porcelain
 ```
+
+
+---
+
+## Round-2 (2026-08-06)
+
+**Verified state today** (measured 2026-08-06, macOS arm64 / CPython 3.14.6):
+`uv run pytest tests/ --cov=src --cov-fail-under=90` → **271 passed**, coverage
+**100.00%** line+branch on `src/` (999 statements, 396 branches, 0 missed).
+`ruff check`, `ruff format --check` (34 files) and `mypy src/ scripts/`
+(19 files) are all clean. The byte-identical regeneration gate
+(`tests/test_regeneration_determinism.py`) still passes with the new figure in
+the pipeline.
+
+### Closed this round (each with a regression/negative-control test)
+
+| Ref | Finding | Fix + test evidence |
+| --- | --- | --- |
+| C1 | **The manuscript's only figure reference dangled.** `03_results.md` embedded `figures/network_flow_centralization.png`, which — resolved relative to `output/manuscript/` — did not exist (figures were written to `output/figures/`). | `scripts/generate_figures.py` now mirrors every figure into `output/manuscript/figures/`; `tests/test_scripts_smoke.py::TestFigureDeployment` resolves every embedded image path from the resolved tree and asserts it exists (refs asserted non-empty, so it cannot pass vacuously). |
+| C2 | **Metadata sidecars described a three-module package and carried the scaffold keyword.** `.zenodo.json`, `codemeta.json`, `CITATION.cff` named only surveillance/cell/geometry and listed `"active inference"`. | All three rewritten to name the six shipped domain areas; the keyword is gone. `tests/test_sidecar_metadata.py` checks the keyword arrays (so the legitimate "Active Inference Institute" affiliation does not trip it) and that all six area terms appear. |
+| C3 | **Config falsely declared a remote repository on a local-only tree.** `manuscript/config.yaml` carried `github_repository`/`repository_url` for a tree that is never pushed. | Keys removed; `tests/test_sidecar_metadata.py::TestC3Config` asserts the config declares no such remote. |
+| V1 (half) | **`sort_keys=True` in the debrief writer was not load-bearing.** Dropping it would not change two identical runs (insertion order is stable), so the run-to-run determinism test could never catch it. | `tests/test_scripts_smoke.py::TestRecordCanonicality` asserts the persisted record equals its key-sorted re-serialization, so the flag is now pinned. |
+| V3 | **`test_domain_isolation.py` hand-maintained its 6-module import list** — a seventh domain module would be silently unguarded. | The import list is now derived from `domain_module_names()`; `test_import_list_is_derived_and_nonempty` asserts the derivation is live and the scan set non-empty. |
+| Edge | **`node_removal_impact` silently no-op'd on an out-of-range index** (removed nothing, returned 0.0). | Now raises `ValueError`; tests for out-of-range and negative indices in `tests/test_network_geometry.py`. |
+| Edge | **`herfindahl_index` / `group_centralization` propagated NaN/inf silently.** | Both reject non-finite inputs; NaN/inf regression tests in `tests/test_surveillance_net.py::TestFiniteValidation`. |
+| E2 | **The org/cascade layer was text-only; the package had one figure.** | Added `plot_brotherhood_cascade` (command tree, cells as colours, live exposure set of the seeded operative), exported from `spectre.figures`, wired into `generate_figures.py`, embedded in `03_results.md`, registered in `manuscript/SYNTAX.md`; byte-determinism + empty/unknown-seed/cycle branch tests in `tests/test_figures.py`. |
+| D2 | **AGENTS.md step 5 described ledger reconciliation as a manual eyeball.** | Now names `tests/test_claim_ledger.py` as the enforcement (it already was the real gate). |
+
+### Manuscript deepened
+
+- Added a **live-bound summary results table** at the top of `03_results.md`; every
+  cell is an injected `{{TOKEN}}` from the measured mission output (no new
+  tokens → no ledger churn).
+- Added the **brotherhood compromise-cascade figure** (E2) so the org layer is
+  visual, not text-only.
+- Abstract, methodology, results, limitations (07 "Threats to validity"),
+  reproducibility and 15-entry bibliography were already in place and verified
+  to hydrate (no leftover `{{TOKEN}}` in the resolved tree).
+
+### Known open for a future round
+
+- **E1** — wire `bond_utilities.mission_io.record_provenance_outcome` into
+  `scripts/debrief.py` (blocked on declaring the `bond-utilities` path dep in
+  `pyproject.toml`).
+- **E3** — volume-weighted `network_efficiency` / `critical_node_order` so the
+  geometry layer pools with the traffic layer.
+- **E4** — an adaptive (rewiring) adversary for the one-shot greedy optimizations.
+- **D1** — `docs/_generated/COUNTS.md` test-count/coverage rows are still a
+  hand-recorded snapshot (inventory rows remain pinned live); a generator
+  remains the clean fix.
+- **D3** — no render format has been exercised; all `render.formats` toggles are
+  still off, so a first render could still surface a cross-reference or
+  layout defect the figure-path test (C1) now pre-empts for embeds only.

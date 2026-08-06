@@ -172,3 +172,17 @@ class TestEfficiencyOnDisconnectedGraph:
     def test_fully_isolated_graph_has_zero_efficiency(self) -> None:
         _, adj = build_adjacency(("A", "B", "C"), ())
         assert network_efficiency(adj) == 0.0
+
+    def test_out_of_range_index_raises(self) -> None:
+        _, adj = build_adjacency(("A", "B"), (("A", "B"),))
+        with pytest.raises(ValueError, match="out of range"):
+            node_removal_impact(adj, 5)
+
+    def test_negative_index_raises(self) -> None:
+        _, adj = build_adjacency(("A", "B"), (("A", "B"),))
+        with pytest.raises(ValueError, match="out of range"):
+            node_removal_impact(adj, -1)
+
+    def test_valid_index_still_works(self) -> None:
+        _, adj = build_adjacency(("A", "B", "C"), (("A", "B"), ("B", "C")))
+        assert node_removal_impact(adj, 1) > 0.0

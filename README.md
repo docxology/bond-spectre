@@ -28,7 +28,7 @@ deterministic analysis modules behind one frozen mission protocol.
 | `src/spectre/signal_cover.py` | Agency × target coverage matrix, greedy set cover (Johnson), per-target coverage counts, uncovered targets, multi-sensor redundancy index |
 | `src/spectre/mission.py` | The FROZEN `bond_api` `MissionProvider` adapter + the canonical dataset + gadget registration (the only module that imports `bond_api`) |
 | `src/spectre/manuscript_variables.py` | Computes every manuscript token from `manuscript/config.yaml` plus the measured mission output |
-| `src/spectre/figures/networks.py` | Deterministic matplotlib flow-centralization figure |
+| `src/spectre/figures/networks.py` | Deterministic matplotlib figures: the network flow-centralization figure and the brotherhood compromise-cascade figure |
 
 Every metric in the manuscript is **measured** — computed by the deterministic
 NINE EYES mission provider and injected through

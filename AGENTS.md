@@ -78,11 +78,13 @@ grep -l "bond_api" src/spectre/*.py
 uv run ruff check src/ scripts/ tests/ && uv run ruff format --check src/ scripts/ tests/
 uv run mypy src/ scripts/
 
-# 5. Regenerate measured artifacts (hydration LAST) and reconcile the ledger
+# 5. Regenerate measured artifacts (hydration LAST)
 uv run python scripts/debrief.py
 uv run python scripts/generate_figures.py
 uv run python scripts/z_generate_manuscript_variables.py
-#    -> data/claim_ledger.yaml values must equal output/data/manuscript_variables.json
+#    Ledger reconciliation is enforced by tests/test_claim_ledger.py (part of
+#    step 1), not by eye: a missing row, a stale row, or a drifted value fails
+#    there. The script step above only regenerates the artifacts it compares.
 
 # 6. Determinism spot-check
 uv run python scripts/debrief.py && cp output/data/nine_eyes_debrief.json /tmp/run1.json

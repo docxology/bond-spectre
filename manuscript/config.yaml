@@ -20,9 +20,9 @@ authors:
 
 publication:
   # Local-only working tree: no remote, no DOI. Dropped per the BOND fork
-  # contract (metadata sidecars omit DOI fields).
-  github_repository: "docxology/spectre"
-  repository_url: "https://github.com/docxology/spectre"
+  # contract (metadata sidecars omit DOI fields). The inherited exemplar
+  # declared a repository URL that a never-pushed tree cannot truthfully own,
+  # so that declaration is removed rather than set to a non-existent location.
   journal: "BOND Mission Software Series"
   year: "2026"
 

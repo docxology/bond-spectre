@@ -3,7 +3,7 @@
   "@type": "SoftwareSourceCode",
   "name": "Spectre: NINE EYES — Special-Agent Mission Software",
   "identifier": "spectre",
-  "description": "BOND film package for Spectre (2015), mission codename NINE EYES. Models surveillance-network data-flow centralization, criminal-organisation cell structure (SPECTRE), and network geometry. Deterministic, zero-mock, protocol-driven.",
+  "description": "BOND film package for Spectre (2015), mission codename NINE EYES. Six pure, deterministic analysis modules: surveillance-network data-flow centralization and betweenness; criminal-organisation cell structure and compartmentalization; connectivity geometry, articulation points and critical nodes; volume-weighted traffic interception and budgeted monitoring; compromise cascades through the brotherhood; and sensor-placement set cover with coverage redundancy. Deterministic, zero-mock, protocol-driven.",
   "version": "0.1.0",
   "license": "https://spdx.org/licenses/MIT",
   "author": [
@@ -22,7 +22,10 @@
     "cell compartmentalization",
     "network geometry",
     "critical nodes",
-    "active inference"
+    "traffic interception",
+    "compromise cascade",
+    "sensor-placement set cover",
+    "deterministic reproducibility"
   ],
   "programmingLanguage": "Python"
 }

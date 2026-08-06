@@ -8,6 +8,7 @@ no mocks.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -78,3 +79,43 @@ class TestFigureScript:
         figure = PROJECT_ROOT / "output" / "figures" / "network_flow_centralization.png"
         assert figure.exists()
         assert figure.stat().st_size > 0
+
+
+class TestFigureDeployment:
+    """C1: every image embed in the resolved manuscript must resolve to a file."""
+
+    def test_every_embedded_figure_resolves_from_resolved_manuscript(self) -> None:
+        result = _run("z_generate_manuscript_variables.py", "--allow-draft")
+        assert result.returncode == 0, result.stderr
+        result = _run("generate_figures.py")
+        assert result.returncode == 0, result.stderr
+
+        manuscript_dir = PROJECT_ROOT / "output" / "manuscript"
+        refs: list[tuple[str, str]] = []
+        for md in manuscript_dir.glob("*.md"):
+            for match in re.finditer(r"!\[[^\]]*\]\(([^)]+)\)", md.read_text(encoding="utf-8")):
+                refs.append((md.name, match.group(1)))
+        assert refs, "no image references found in the resolved manuscript"
+        for fname, ref in refs:
+            target = (manuscript_dir / ref).resolve()
+            assert target.exists(), f"{fname}: embedded figure {ref!r} does not resolve"
+
+
+class TestRecordCanonicality:
+    """V1 half: the persisted record must be canonical key-sorted JSON.
+
+    Dropping ``sort_keys=True`` from a writer would not change two identical
+    runs (insertion order is stable), so the run-to-run determinism test cannot
+    catch it; this asserts the bytes equal the key-sorted re-serialization, so
+    the flag is load-bearing.
+    """
+
+    def test_persisted_record_is_key_sorted(self) -> None:
+        result = _run("debrief.py")
+        assert result.returncode == 0, result.stderr
+        path = PROJECT_ROOT / "output" / "data" / "nine_eyes_debrief.json"
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+        assert raw == json.dumps(data, indent=2, sort_keys=True) + "\n", (
+            "persisted debrief record is not key-sorted canonical JSON"
+        )

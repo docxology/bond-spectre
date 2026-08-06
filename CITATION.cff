@@ -2,10 +2,13 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "Spectre: NINE EYES — Special-Agent Mission Software"
 abstract: >-
-  BOND film package for Spectre (2015), mission codename NINE EYES. Models the
-  global surveillance programme: surveillance-network data-flow centralization,
-  criminal-organisation cell structure (SPECTRE), and network geometry
-  (connectivity, critical nodes). Deterministic, zero-mock, protocol-driven.
+  BOND film package for Spectre (2015), mission codename NINE EYES. Six pure,
+  deterministic analysis modules over one canonical dataset:
+  surveillance-network data-flow centralization and betweenness; criminal-org
+  cell structure, hierarchy and compartmentalization; connectivity geometry,
+  articulation points and critical nodes; volume-weighted traffic interception
+  and budgeted submodular monitoring allocation; compromise cascades through
+  the brotherhood; and sensor-placement set cover with coverage redundancy.
 authors:
   - family-names: Friedman
     given-names: Daniel Ari
@@ -18,7 +21,9 @@ keywords:
   - cell compartmentalization
   - network geometry
   - critical nodes
-  - active inference
+  - traffic interception
+  - compromise cascade
+  - sensor-placement set cover
 license: MIT
 version: "0.1.0"
 date-released: "2026-08-04"

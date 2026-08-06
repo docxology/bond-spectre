@@ -2,8 +2,27 @@
 
 All values below are produced by the NINE EYES mission provider's `execute`
 step over the canonical dataset and injected as tokens; the same run also
-writes `output/data/nine_eyes_debrief.json` with the provenance record under
-which they were measured.
+writes which they were measured.
+
+## Summary of measured results
+
+Every quantity below is injected as a token from the NINE EYES mission
+provider's `execute` output; none is typed by hand.
+
+| Quantity | Measured value | Source module |
+| --- | --- | --- |
+| Group centralization over out-degrees | {{SPECTRE_CENTRALIZATION_INDEX}} | `surveillance_net.group_centralization` |
+| Inflow-share Herfindahl (even-spread floor) | {{SPECTRE_FLOW_CONCENTRATION_HHI}} ({{SPECTRE_FLOW_CONCENTRATION_FLOOR}}) | `surveillance_net.herfindahl_index` |
+| Seeded cascade reach (mean, {{SPECTRE_CASCADE_TRIALS}} trials) | {{SPECTRE_CASCADE_COVERAGE}} | `surveillance_net.expected_cascade_coverage` |
+| Hierarchy height (chain complete: {{SPECTRE_CHAIN_COMPLETE}}) | {{SPECTRE_HIERARCHY_HEIGHT}} | `org_intel.hierarchy_stats` |
+| Cell compartmentalization | {{SPECTRE_COMPARTMENTALIZATION}} | `org_intel.compartmentalization` |
+| Articulation points | {{SPECTRE_NUM_ARTICULATION_POINTS}} ({{SPECTRE_ARTICULATION_NODES}}) | `network_geometry.articulation_points` |
+| Global efficiency | {{SPECTRE_NETWORK_EFFICIENCY}} | `network_geometry.network_efficiency` |
+| Critical nodes (greedy) | {{SPECTRE_CRITICAL_NODES}} | `network_geometry.critical_node_order` |
+| Total carried traffic / top link | {{SPECTRE_TRAFFIC_TOTAL}} / {{SPECTRE_TRAFFIC_TOP_LINK}} | `traffic_intel.total_traffic` |
+| Monitored coverage ({{SPECTRE_MONITOR_BUDGET}} agencies) | {{SPECTRE_MONITOR_COVERAGE}} | `traffic_intel.monitor_allocation` |
+| Expected compromise (leadership) | {{SPECTRE_COMPROMISE_FRACTION}} ({{SPECTRE_LEADERSHIP_HIT_RATE}}) | `infiltration.expected_damage` |
+| Set cover ({{SPECTRE_SET_COVER_SIZE}} agencies) | redundancy {{SPECTRE_COVER_REDUNDANCY}}, uncovered {{SPECTRE_UNCOVERED_AFTER_COVER}} | `signal_cover.greedy_set_cover` |
 
 ## Surveillance-network centralization
 
@@ -40,6 +59,8 @@ walk from the apex — with a hierarchy height of {{SPECTRE_HIERARCHY_HEIGHT}}
 links. Cell compartmentalization measures {{SPECTRE_COMPARTMENTALIZATION}}: the
 brotherhood keeps a high (but imperfect) degree of separation between its
 cells, the imperfection coming from command edges that cross cell boundaries.
+
+![The SPECTRE brotherhood command tree. Node colour is the operative's cell, the ringed node is Mr White (the operative seeded in the compromise cascade), and the violet-highlighted nodes are the set his turn exposes — cellmates, superior and subordinates — drawn live from `org_intel.exposure`.](figures/brotherhood_cascade.png){#fig:brotherhood_cascade}
 
 ## Network geometry
 

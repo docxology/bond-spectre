@@ -1,6 +1,6 @@
 {
   "title": "Spectre: NINE EYES — Special-Agent Mission Software",
-  "description": "BOND film package for Spectre (2015), mission codename NINE EYES. Models surveillance-network data-flow centralization, criminal-organisation cell structure (SPECTRE), and network geometry (connectivity, critical nodes). Deterministic, zero-mock, protocol-driven.",
+  "description": "BOND film package for Spectre (2015), mission codename NINE EYES. Six pure, deterministic analysis modules over one canonical dataset: surveillance-network data-flow centralization and betweenness (surveillance_net); criminal-organisation cell structure, hierarchy and compartmentalization (org_intel); connectivity geometry, articulation points and critical nodes (network_geometry); volume-weighted traffic interception and budgeted submodular monitoring allocation (traffic_intel); compromise cascades through the brotherhood (infiltration); and sensor-placement set cover with coverage redundancy (signal_cover). Deterministic, zero-mock, protocol-driven.",
   "creators": [
     {
       "name": "Daniel Ari Friedman",
@@ -17,7 +17,11 @@
     "cell compartmentalization",
     "network geometry",
     "critical nodes",
-    "active inference"
+    "traffic interception",
+    "submodular maximization",
+    "compromise cascade",
+    "sensor-placement set cover",
+    "deterministic reproducibility"
   ],
   "version": "0.1.0"
 }

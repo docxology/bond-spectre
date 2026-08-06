@@ -209,9 +209,11 @@ def node_removal_impact(adjacency: np.ndarray, node: int) -> float:
     connectivity, and returns the fractional loss ``1 - reduced/baseline``.
     """
     n = len(adjacency)
-    baseline = _pairwise_connectivity(adjacency)
     if n == 0:
         return 0.0
+    if not 0 <= node < n:
+        raise ValueError(f"node index {node} out of range for a {n}-node graph")
+    baseline = _pairwise_connectivity(adjacency)
     mask = np.arange(n) != node
     reduced = adjacency[np.ix_(mask, mask)]
     post = _pairwise_connectivity(reduced)
