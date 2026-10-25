@@ -124,7 +124,8 @@ BOND suite root. A standalone clone must pass the shared line length explicitly
 (`ruff check --line-length 120 src/ scripts/ tests/` — the default rule set then
 reports findings that root's narrower `select` excludes, such as `RUF100` on the
 required `# noqa: E402` bootstrap lines). `ruff format --check --line-length 120
-src/ scripts/ tests/` is portable as-is: 34 files already formatted.
+src/ scripts/ tests/` is portable as-is — it is clean across `src/`, `scripts/`
+and `tests/`, and it prints its own file count rather than quoting one here.
 
 ## 5. Determinism checks
 
