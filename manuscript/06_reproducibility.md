@@ -6,18 +6,18 @@ The entire artifact set regenerates byte-identical from a clean tree:
 
 ```bash
 uv run python scripts/debrief.py              # runs the full mission
-uv run python scripts/generate_figures.py     # writes the network figure
+uv run python scripts/generate_figures.py     # writes both figures
 uv run python scripts/z_generate_manuscript_variables.py  # hydrates tokens (runs LAST)
 ```
 
 Each script recomputes its results from the fixed canonical dataset; there is
 no stored intermediate that could drift from the code. The mission record,
-figure and hydrated manuscript are written under `output/` (git-ignored,
+figures and hydrated manuscript are written under `output/` (git-ignored,
 regenerable).
 
 The claim is scoped precisely. **Within one software environment**, two full
 regenerations produce byte-identical `output/` artifacts — mission record,
-figure PNG, `manuscript_variables.json` and every hydrated section — because
+figure PNGs, `manuscript_variables.json` and every hydrated section — because
 hydration is a pure function of the committed tree: no wall clock, no untracked
 RNG, no run counter. The single environment-dependent value is the interpreter
 stamp printed at the end of this section (`{{PLATFORM}}`, `{{PYTHON_VERSION}}`),

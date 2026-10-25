@@ -11,6 +11,7 @@ Evidence-registry for manuscript claims that are intentionally sourced from code
 | Field | Purpose |
 | --- | --- |
 | `claim_id` | Stable identifier |
+| `token` | The measured `{{TOKEN}}` this row reconciles (the key `tests/test_claim_ledger.py` matches on) |
 | `kind` | Claim category |
 | `value` | Declared numeric or textual value |
 | `source` | Provenance (module, manuscript section, artifact) |

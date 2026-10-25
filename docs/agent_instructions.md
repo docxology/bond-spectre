@@ -9,15 +9,28 @@ reference is in [`architecture.md`](architecture.md). This file is the
 ## 0. Environment
 
 ```bash
-cd projects/working/bond/spectre
 uv sync --extra dev      # installs numpy/matplotlib/pyyaml + the local bond-api path dep
 ```
 
+Run from the repository root: this standalone clone *is* the package (in the
+BOND suite it lives at `projects/working/bond/spectre`).
+
 `bond-api` is a **path dependency** pinned in `pyproject.toml` under
-`[tool.uv.sources]`. If the sibling `bond-api` package moves, `uv sync` fails
-loudly — that is intended; do not vendor a copy to work around it. The six
-domain modules never import it, so tests on the pure core keep working even
+`[tool.uv.sources]`, and the pinned path is inside the suite monorepo, so a
+standalone clone cannot resolve it. If the sibling `bond-api` package moves,
+`uv sync` fails loudly — that is intended; do not vendor a copy to work around
+it, and do not repoint the pin at a registry or a non-existent repository. The
+six domain modules never import it, so tests on the pure core keep working even
 while the protocol package is being rebuilt.
+
+Without a suite checkout that pin cannot resolve, and the gates are still
+runnable: create a throwaway env **outside** the repo, install
+`numpy matplotlib pyyaml pytest pytest-cov ruff mypy` into it, put `<repo>/src`
+plus a `bond_api` (from the suite checkout or the uv cache) on `PYTHONPATH`, and
+run the commands below from the repository root. Re-measured that way on
+2026-10-25 (CPython 3.14.9, numpy 2.4.2, mypy 2.3.0, ruff 0.16.1): **271
+passed**, 100.00% line+branch (999 statements, 396 branches), mypy clean on 19
+files, `ruff format --check --line-length 120` clean on 34 files.
 
 If a `uv` command fails with `Failed to initialize cache` or
 `Operation not permitted`, that is a sandbox restriction, not a package
@@ -105,6 +118,14 @@ The achieved coverage and test count are recorded in
 [`_generated/COUNTS.md`](_generated/COUNTS.md) — regenerate that file from a
 real run rather than editing the numbers.
 
+`ruff` is the one gate this repo does not fully declare: there is no
+`[tool.ruff]` table here, so the rule selection and line length come from the
+BOND suite root. A standalone clone must pass the shared line length explicitly
+(`ruff check --line-length 120 src/ scripts/ tests/` — the default rule set then
+reports findings that root's narrower `select` excludes, such as `RUF100` on the
+required `# noqa: E402` bootstrap lines). `ruff format --check --line-length 120
+src/ scripts/ tests/` is portable as-is: 34 files already formatted.
+
 ## 5. Determinism checks
 
 ```bash
@@ -124,5 +145,8 @@ Path-scoped, inside this repository only:
 git add -A && git commit -m "spectre: <what changed and why>"
 ```
 
-This is a **local-only** tree with no remote. Never push. Never touch a sibling
-BOND package, the bond root files, or the template repository.
+This repository is the **published snapshot** of the suite package
+(`github.com/docxology/bond-spectre`), so commits here are pushed normally —
+never force-pushed and never history-rewritten. The BOND suite's own working
+tree is the local-only one. Never touch a sibling BOND package, the suite root
+files, or the template repository.

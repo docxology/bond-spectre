@@ -8,7 +8,7 @@ __pycache__/
 # Egg-info from local installs (any location — guards against renamed-fork drift).
 **/*.egg-info/
 
-# Project-local virtualenvs (root .venv is shared)
+# Virtualenvs (in the BOND suite the root .venv is shared with the package)
 .venv/
 
 # Regenerable analysis artifacts — written by scripts/, never hand-edited.

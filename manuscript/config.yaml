@@ -19,10 +19,10 @@ authors:
     corresponding: true
 
 publication:
-  # Local-only working tree: no remote, no DOI. Dropped per the BOND fork
-  # contract (metadata sidecars omit DOI fields). The inherited exemplar
-  # declared a repository URL that a never-pushed tree cannot truthfully own,
-  # so that declaration is removed rather than set to a non-existent location.
+  # No DOI and no repository declaration: DOI fields are dropped by the BOND
+  # fork contract (the metadata sidecars omit them too), and no token consumes a
+  # repository URL. The inherited exemplar declared "docxology/spectre", which
+  # never existed, so the keys are absent rather than false.
   journal: "BOND Mission Software Series"
   year: "2026"
 

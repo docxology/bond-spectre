@@ -9,13 +9,13 @@ tags: [bond, spectre, nine-eyes, surveillance-network, org-intel, network-geomet
 
 # spectre
 
-Project-scoped skill for the BOND film package at
-`projects/working/bond/spectre/` (mission codename **NINE EYES**). Load this
-when working inside the project.
+Project-scoped skill for the BOND film package that *is* this repository — the
+standalone snapshot of the suite's `projects/working/bond/spectre/` (mission
+codename **NINE EYES**). Load this when working inside the project.
 
 ## When to Use
 
-- Working inside `projects/working/bond/spectre/` — running mission CLIs,
+- Working inside this repository (the package root) — running mission CLIs,
   editing domain modules, regenerating outputs.
 - Implementing or inspecting the FROZEN `bond_api.MissionProvider`
   (`src/spectre/mission.py`).
@@ -25,7 +25,6 @@ when working inside the project.
 ## Quick Reference
 
 ```bash
-cd projects/working/bond/spectre
 uv sync --extra dev                       # install deps incl. the bond-api path dep
 uv run pytest tests/ --cov=src --cov-fail-under=90
 uv run ruff check src/ scripts/ tests/ && uv run ruff format --check src/ scripts/ tests/

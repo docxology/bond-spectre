@@ -55,8 +55,11 @@ standalone; the protocol contract is isolated in the thin adapter.
 
 ## Quickstart
 
+Run from the repository root: this standalone clone *is* the package (the
+`projects/working/bond/spectre` path applies only to the BOND suite checkout it
+was snapshotted from).
+
 ```bash
-cd projects/working/bond/spectre
 uv sync --extra dev                    # install deps + the frozen bond-api path dep
 uv run pytest tests/ --cov=src --cov-fail-under=90
 
@@ -66,6 +69,12 @@ uv run python scripts/debrief.py       # full run; writes output/data/nine_eyes_
 uv run python scripts/generate_figures.py
 uv run python scripts/z_generate_manuscript_variables.py   # hydrate manuscript tokens (last)
 ```
+
+`bond-api` is a **local path dependency** declared in `[tool.uv.sources]` that
+points into the BOND suite monorepo, which a standalone clone does not have:
+`uv sync` fails loudly there by design, and the six domain modules still import
+and test standalone (`tests/test_domain_isolation.py` proves it in a subprocess
+with `bond_api` unavailable).
 
 `uv` cannot write its cache under a restrictive sandbox; a
 `Failed to initialize cache` error is an environment restriction, not a package
@@ -120,5 +129,6 @@ real run — this README states the gate, not a figure that can go stale.
   extension), accepted limitations, and the verification gates.
 - [`data/claim_ledger.yaml`](data/claim_ledger.yaml) — one row per measured manuscript token: recorded value, producing function, artifact path. Reconciled by `tests/test_claim_ledger.py`.
 
-Local-only working tree — this package is part of the BOND suite and is never
-pushed to any remote.
+This repository is the published standalone snapshot of the `spectre` package
+(`github.com/docxology/bond-spectre`); the BOND suite's own working tree, where
+the package lives as `projects/working/bond/spectre`, stays local-only.

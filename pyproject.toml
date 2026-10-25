@@ -1,5 +1,7 @@
 # SPECTRE Configuration — NINE EYES surveillance-network mission package
-# Inherits workspace settings from root pyproject.toml
+# Inside the BOND suite this file inherits workspace settings from the suite
+# root pyproject.toml (ruff rule selection among them); this standalone clone
+# gets only what is declared below, so there is no [tool.ruff] table here.
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -33,7 +35,9 @@ dev = [
 # Local path dependency on the FROZEN bond-api protocol (Layer 1). The pure
 # domain core in src/spectre/{surveillance_net,org_intel,network_geometry}.py
 # does NOT import bond-api (importable standalone); mission.py is the thin
-# adapter that implements the Frozen MissionProvider contract.
+# adapter that implements the Frozen MissionProvider contract. The pinned path
+# is suite provenance — a standalone clone has no such checkout, so `uv sync`
+# there fails by design and the path must not be repointed at a registry.
 [tool.uv.sources]
 bond-api = { path = "/Users/4d/Documents/GitHub/template/projects/working/bond/bond-api" }
 
@@ -82,4 +86,5 @@ module = "bond_api.*"
 ignore_missing_imports = true
 
 [tool.uv]
-# Inherits workspace settings from root pyproject.toml
+# No uv overrides here: in the suite the workspace root supplies them, and a
+# standalone clone runs on uv's defaults.

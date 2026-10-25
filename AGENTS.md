@@ -4,9 +4,12 @@
 
 - **Package**: `spectre` — BOND film package for *Spectre* (2015), mission
   codename **NINE EYES**.
-- **Scope**: exactly this directory. Never touch sibling BOND packages, bond
-  root files, or the template repo.
-- **Local-only**: no remote, never push.
+- **Scope**: exactly this repository. Never touch sibling BOND packages, the
+  suite root files, or the template repo.
+- **Published snapshot**: `origin` is `github.com/docxology/bond-spectre`, the
+  public snapshot of this suite package; the suite's own working tree stays
+  local-only. Commits here are path-scoped (rule 9) and pushed normally —
+  never force-pushed, never history-rewritten.
 
 ## Layout contract
 
@@ -62,7 +65,9 @@ these names. Deepen inside them; never rename or re-shape them:
 ## Build & verify
 
 ```bash
-# Install (bond-api is a local path dependency declared in pyproject.toml)
+# Install (bond-api is a local path dependency declared in pyproject.toml; the
+# pinned path lives in the BOND suite monorepo, so a standalone clone cannot
+# resolve it — the pure core still imports and tests without it)
 uv sync --extra dev
 
 # 1. Tests + coverage gate (line AND branch on src/)

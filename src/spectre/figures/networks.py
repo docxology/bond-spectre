@@ -1,7 +1,7 @@
 """Matplotlib figures for the Spectre / NINE EYES package.
 
 Publication-quality figures per analysed concept. Every generator is
-deterministic (fixed seed, no random component) and writes a single PNG under
+deterministic (fixed seed) and writes one PNG per figure under
 ``output/figures/``. Depends only on ``numpy`` + ``matplotlib`` (plus the
 domain core).
 """

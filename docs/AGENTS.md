@@ -82,7 +82,8 @@ uv run python scripts/generate_figures.py
 uv run python scripts/z_generate_manuscript_variables.py
 
 # 3. Reconcile the recorded claims with what was just measured.
-#    data/claim_ledger.yaml values must match output/data/manuscript_variables.json.
+#    data/claim_ledger.yaml values must match output/data/manuscript_variables.json;
+#    tests/test_claim_ledger.py (step 1) enforces that, not an eyeball.
 
 # 4. Gates.
 uv run ruff check src/ scripts/ tests/

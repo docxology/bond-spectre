@@ -8,7 +8,8 @@ behind one frozen `bond_api.MissionProvider` adapter in `src/spectre/mission.py`
 with every manuscript number hydrated from the measured `execute()` output and
 reconciled against `data/claim_ledger.yaml`.
 
-**Verified state today** (measured 2026-08-05, macOS arm64 / CPython 3.14.6):
+**Verified state at phase-6** (measured 2026-08-05, macOS arm64 / CPython 3.14.6;
+superseded by the Round-2 re-measurement at the end of this file):
 `uv run pytest tests/ --cov=src --cov-fail-under=90` → **246 passed**, coverage
 **100.00%** line+branch on `src/` (928 statements, 358 branches, 0 missed).
 `ruff check`, `ruff format --check`, and `mypy src/ scripts/` are all clean.
@@ -47,6 +48,12 @@ today.
 ---
 
 ## Open work
+
+> Superseded in part: the Round-2 section at the end of this file closes C1,
+> C2, C3, E2, V3, D2 and the V1 sort-key half, and V2 carries its own closure
+> note (2026-08-05). The rows below keep the original finding text; the closure
+> evidence lives in that section's table. The verification block further down
+> has been re-measured — its live counts are 271 passed / 100.00%.
 
 ### Correctness
 
@@ -114,9 +121,11 @@ today.
   `greedy_set_cover` at Johnson's `O(log n)`, with Feige's threshold as the
   reason not to chase an exact solver). The reported selections are the greedy
   ones.
-- **No DOI, no remote.** `manuscript/config.yaml:22-23` drops DOI fields by the
-  BOND fork contract; the tree is local-only and never pushed. (The stale
-  repository URL two lines below is a separate defect — C3.)
+- **No DOI, and no repository URL in the manuscript config.**
+  `manuscript/config.yaml` drops DOI fields by the BOND fork contract, and the
+  exemplar's invented repository URL was removed outright (C3). This repository
+  is the published snapshot of the package
+  (`github.com/docxology/bond-spectre`), not the DOI surface of record.
 - **`output/` is disposable and git-ignored.** Everything under it is
   regenerable from `scripts/`. Never edit an artifact to make a gate pass.
 
@@ -124,13 +133,16 @@ today.
 
 ## Verification
 
-Run from `projects/working/bond/spectre`. If `uv` reports `Failed to initialize
-cache` or `Operation not permitted`, that is a sandbox restriction — re-run with
-the sandbox disabled. If you touch `pyproject.toml`, sync with
-`uv sync --all-extras` (a bare `uv sync` prunes pytest).
+Run from the repository root — this standalone clone *is* the package (in the
+BOND suite it lives at `projects/working/bond/spectre`). With no suite checkout
+next to it, the `bond-api` path pin cannot resolve, so `uv run pytest` is only
+available in an environment where `bond_api` is importable. If `uv` reports
+`Failed to initialize cache` or `Operation not permitted`, that is a sandbox
+restriction — re-run with the sandbox disabled. If you touch `pyproject.toml`,
+sync with `uv sync --all-extras` (a bare `uv sync` prunes pytest).
 
 ```bash
-# 1. Tests + coverage gate — expect 246 passed, 100.00% line+branch on src/
+# 1. Tests + coverage gate — expect 271 passed, 100.00% line+branch on src/
 uv run pytest tests/ --cov=src --cov-fail-under=90
 
 # 2. Zero mocks — expect "Clean"
@@ -152,7 +164,7 @@ uv run python scripts/z_generate_manuscript_variables.py
 #    Ledger reconciliation is enforced by tests/test_claim_ledger.py (step 1),
 #    not by eye: a missing row, a stale row, or a drifted value fails there.
 
-# 6. Determinism spot-check (manual until V1 lands)
+# 6. Determinism spot-check (V1 is now a gate — tests/test_regeneration_determinism.py)
 uv run python scripts/debrief.py && cp output/data/nine_eyes_debrief.json /tmp/run1.json
 uv run python scripts/debrief.py && diff /tmp/run1.json output/data/nine_eyes_debrief.json
 
