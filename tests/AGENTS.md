@@ -31,8 +31,8 @@
 - **No gate that cannot fail.** A validation branch unreachable from its only call site, or a test
   that asserts only that a call returned, is removed or made real. A new guard needs the test that
   fires it in the same pass.
-- **`test_mission.py` is the module that needs the sibling `bond-api`.** The pure core's own tests run
-  without it.
+- **`test_mission.py` is the module that needs `bond-api`**, resolved from the vendored copy. The
+  pure core's own tests run without it.
 - **If the suite cannot import `bond_api` under `uv run pytest`,** run it as
   `uv run python -m pytest`: a stale console script left in `.venv/bin` by an earlier interpreter
   outlives that interpreter. Gate through the interpreter.

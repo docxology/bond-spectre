@@ -65,9 +65,9 @@ these names. Deepen inside them; never rename or re-shape them:
 ## Build & verify
 
 ```bash
-# Install (bond-api is a local path dependency declared in pyproject.toml; the
-# pinned path lives in the BOND suite monorepo, so a standalone clone cannot
-# resolve it — the pure core still imports and tests without it)
+# Install (bond-api is declared in pyproject.toml and resolved from the vendored
+# copy at vendor/bond-api, so this clone syncs without the BOND suite; the pure
+# core still imports and tests without it)
 uv sync --extra dev
 
 # 1. Tests + coverage gate (line AND branch on src/)

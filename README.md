@@ -70,11 +70,13 @@ uv run python scripts/generate_figures.py
 uv run python scripts/z_generate_manuscript_variables.py   # hydrate manuscript tokens (last)
 ```
 
-`bond-api` is a **local path dependency** declared in `[tool.uv.sources]` that
-points into the BOND suite monorepo, which a standalone clone does not have:
-`uv sync` fails loudly there by design, and the six domain modules still import
-and test standalone (`tests/test_domain_isolation.py` proves it in a subprocess
-with `bond_api` unavailable).
+`bond-api` is a **path dependency** declared in `[tool.uv.sources]` and resolved
+from the vendored copy at `vendor/bond-api`, so `uv sync` works in a standalone
+clone; the copy's bytes are recorded in `vendor/bond-api/PROVENANCE.json` and
+re-verified by `scripts/vendor.py --check` inside the test suite. The six domain
+modules still import and test standalone
+(`tests/test_domain_isolation.py` proves it in a subprocess with `bond_api`
+unavailable).
 
 `uv` cannot write its cache under a restrictive sandbox; a
 `Failed to initialize cache` error is an environment restriction, not a package

@@ -1,7 +1,8 @@
 # SPECTRE Configuration — NINE EYES surveillance-network mission package
 # Inside the BOND suite this file inherits workspace settings from the suite
-# root pyproject.toml (ruff rule selection among them); this standalone clone
-# gets only what is declared below, so there is no [tool.ruff] table here.
+# root pyproject.toml; the standalone clone builds its own, so the table below
+# declares what this repository's gate runs under, and it excludes the vendored
+# copy from both ruff and mypy.
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -35,11 +36,12 @@ dev = [
 # Local path dependency on the FROZEN bond-api protocol (Layer 1). The pure
 # domain core in src/spectre/{surveillance_net,org_intel,network_geometry}.py
 # does NOT import bond-api (importable standalone); mission.py is the thin
-# adapter that implements the Frozen MissionProvider contract. The pinned path
-# is suite provenance — a standalone clone has no such checkout, so `uv sync`
-# there fails by design and the path must not be repointed at a registry.
+# adapter that implements the Frozen MissionProvider contract. The path below
+# resolves to the vendored copy of bond-api, so a standalone clone syncs; the
+# copy is byte-identical to upstream and must not be repointed at a registry,
+# whose bond-api name belongs to an unrelated project.
 [tool.uv.sources]
-bond-api = { path = "../bond-api" }
+bond-api = { path = "vendor/bond-api" }
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
@@ -70,6 +72,8 @@ exclude_lines = [
 [tool.mypy]
 # Project-local mypy settings (the monorepo root config has no mypy_path for
 # this package's src/ layout). Mirrors the root gates.
+# Vendored copies are a dependency; their bytes are bound by scripts/vendor.py.
+exclude = ["(^|/)vendor/"]
 python_version = "3.10"
 mypy_path = ["src"]
 explicit_package_bases = true
@@ -88,3 +92,7 @@ ignore_missing_imports = true
 [tool.uv]
 # No uv overrides here: in the suite the workspace root supplies them, and a
 # standalone clone runs on uv's defaults.
+
+[tool.ruff]
+# The vendored copies are byte-identical to upstream and must stay that way.
+extend-exclude = ["vendor"]
