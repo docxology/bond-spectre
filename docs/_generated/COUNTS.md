@@ -11,7 +11,7 @@ uv run python -c "import sys; sys.path.insert(0,'src'); from spectre.manuscript_
 
 | Metric | Value |
 | --- | --- |
-| Test count | 271 |
+| Test count | 272 |
 | Coverage (line+branch on `src/`) | 100.00% |
 | Statements / branches measured | 999 / 396 |
 | Domain modules | 6 (infiltration, network_geometry, org_intel, signal_cover, surveillance_net, traffic_intel) |
@@ -23,7 +23,9 @@ uv run python -c "import sys; sys.path.insert(0,'src'); from spectre.manuscript_
 | Manuscript sections resolved | 9 (00–07, 99) |
 | Bibliography entries | 15 |
 
-Measured on the run that produced the coverage table above. The module, gadget,
+Hand-recorded snapshot, dated **2026-11-03** (272 tests, CPython 3.14.9): the test-count, coverage
+percentage and statement/branch rows are read off the run that produced the coverage table above and
+nothing fails when they drift. The rows below are the ones asserted live. The module, gadget,
 plan-step and token counts are additionally asserted live by
 `tests/test_manuscript_variables.py::TestMeasuredInventories`, so drift between
 the code and those rows fails the suite rather than sitting here quietly. Those
