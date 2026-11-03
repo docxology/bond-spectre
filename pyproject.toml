@@ -39,7 +39,7 @@ dev = [
 # is suite provenance — a standalone clone has no such checkout, so `uv sync`
 # there fails by design and the path must not be repointed at a registry.
 [tool.uv.sources]
-bond-api = { path = "/Users/4d/Documents/GitHub/template/projects/working/bond/bond-api" }
+bond-api = { path = "../bond-api" }
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
