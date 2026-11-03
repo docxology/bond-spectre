@@ -5,8 +5,11 @@ CITATION.cff) must describe all six shipped domain modules, not the three that
 the package had before phase-4, and must not carry the exemplar scaffold's
 off-topic "active inference" keyword.
 
-C3: the local-only manuscript config must not falsely declare a remote
-repository it is contractually forbidden to push to.
+C3: the manuscript config must not claim a repository it cannot point at. The
+publication block carries no repository key, because no token consumes a
+repository URL and the inherited exemplar's "docxology/spectre" never existed.
+This package's own repository is named in `AGENTS.md` and `README.md`; the
+config is not where that fact lives.
 """
 
 from __future__ import annotations
