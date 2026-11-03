@@ -134,9 +134,9 @@ today.
 ## Verification
 
 Run from the repository root — this standalone clone *is* the package (in the
-BOND suite it lives at `projects/working/bond/spectre`). With no suite checkout
-next to it, the `bond-api` path pin cannot resolve, so `uv run pytest` is only
-available in an environment where `bond_api` is importable. If `uv` reports
+BOND suite it lives at `projects/working/bond/spectre`). The `bond-api` path pin
+resolves to the vendored copy at `vendor/bond-api`, so `uv run pytest` works in
+this clone with no suite checkout. If `uv` reports
 `Failed to initialize cache` or `Operation not permitted`, that is a sandbox
 restriction — re-run with the sandbox disabled. If you touch `pyproject.toml`,
 sync with `uv sync --all-extras` (a bare `uv sync` prunes pytest).

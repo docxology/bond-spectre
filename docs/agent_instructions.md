@@ -9,25 +9,27 @@ reference is in [`architecture.md`](architecture.md). This file is the
 ## 0. Environment
 
 ```bash
-uv sync --extra dev      # installs numpy/matplotlib/pyyaml + the local bond-api path dep
+uv sync --extra dev      # installs numpy/matplotlib/pyyaml + the vendored bond-api
 ```
 
 Run from the repository root: this standalone clone *is* the package (in the
 BOND suite it lives at `projects/working/bond/spectre`).
 
 `bond-api` is a **path dependency** pinned in `pyproject.toml` under
-`[tool.uv.sources]`, and the pinned path is inside the suite monorepo, so a
-standalone clone cannot resolve it. If the sibling `bond-api` package moves,
-`uv sync` fails loudly — that is intended; do not vendor a copy to work around
-it, and do not repoint the pin at a registry or a non-existent repository. The
-six domain modules never import it, so tests on the pure core keep working even
-while the protocol package is being rebuilt.
+`[tool.uv.sources]`; the pin resolves to the vendored copy at `vendor/bond-api`,
+whose bytes are recorded in `vendor/bond-api/PROVENANCE.json` and re-verified by
+`scripts/vendor.py --check` inside this package's own test suite. Do not repoint
+the pin at a registry or a non-existent repository, and do not edit the copy to
+work around a problem: refresh it from upstream instead. The six domain modules
+never import it, so tests on the pure core keep working even while the protocol
+package is being rebuilt.
 
-Without a suite checkout that pin cannot resolve, and the gates are still
-runnable: create a throwaway env **outside** the repo, install
-`numpy matplotlib pyyaml pytest pytest-cov ruff mypy` into it, put `<repo>/src`
-plus a `bond_api` (from the suite checkout or the uv cache) on `PYTHONPATH`, and
-run the commands below from the repository root. Re-measured that way on
+The gates run in a plain clone: `uv sync --extra dev`, then the commands below
+from the repository root. Before the copy was vendored they were runnable only in
+a hand-built environment — a throwaway env **outside** the repo with
+`numpy matplotlib pyyaml pytest pytest-cov ruff mypy` installed, `<repo>/src` plus
+a `bond_api` (from the suite checkout or the uv cache) on `PYTHONPATH`. Re-measured
+that way, before the vendoring, on
 2026-10-25 (CPython 3.14.9, numpy 2.4.2, mypy 2.3.0, ruff 0.16.1): **271
 passed**, 100.00% line+branch (999 statements, 396 branches), mypy clean on 19
 files, `ruff format --check --line-length 120` clean on 34 files.
