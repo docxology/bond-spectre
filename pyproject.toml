@@ -1,7 +1,8 @@
 # SPECTRE Configuration — NINE EYES surveillance-network mission package
-# Inside the BOND suite this file inherits workspace settings from the suite
-# root pyproject.toml; the standalone clone builds its own, so the table below
-# declares what this repository's gate runs under, and it excludes the vendored
+# This file carries its own [tool.ruff] table, so ruff reads it instead of the
+# suite root's config — ruff selects the nearest configuration and does not
+# merge a parent's, so the rule set and line length here are ruff's defaults, in
+# the suite as much as in a clone (TODO.md V5). The table excludes the vendored
 # copy from both ruff and mypy.
 
 [build-system]

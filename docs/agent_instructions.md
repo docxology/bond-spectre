@@ -120,14 +120,18 @@ The achieved coverage and test count are recorded in
 [`_generated/COUNTS.md`](_generated/COUNTS.md) — regenerate that file from a
 real run rather than editing the numbers.
 
-`ruff` is the one gate this repo does not fully declare: there is no
-`[tool.ruff]` table here, so the rule selection and line length come from the
-BOND suite root. A standalone clone must pass the shared line length explicitly
-(`ruff check --line-length 120 src/ scripts/ tests/` — the default rule set then
-reports findings that root's narrower `select` excludes, such as `RUF100` on the
-required `# noqa: E402` bootstrap lines). `ruff format --check --line-length 120
-src/ scripts/ tests/` is portable as-is — it is clean across `src/`, `scripts/`
-and `tests/`, and it prints its own file count rather than quoting one here.
+`ruff` reads this repository's own `[tool.ruff]` table — created by the vendoring,
+holding only `extend-exclude = ["vendor"]`. Ruff selects the nearest
+configuration and does not merge a parent's, so the rule set and line length are
+ruff's defaults, in the suite as much as in a clone; the suite root's settings no
+longer reach this gate. Measured 2026-11-04 with ruff 0.16.1: `ruff check` is red
+either way — 44 findings with the table, 44 with its body replaced by
+`line-length = 120` in the same file, and 44 at the pre-vendoring head under that
+setting — while `ruff format --check` reports 23 of 39 files to reformat under the
+defaults and 1 file, `scripts/vendor.py`, under `line-length = 120` (0 files at the
+pre-vendoring head). It prints its own file counts rather than quoting them here;
+the full control and the decision that the minimal table stays are in `TODO.md`
+V5.
 
 ## 5. Determinism checks
 
