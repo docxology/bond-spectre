@@ -96,7 +96,7 @@ uv run python scripts/debrief.py && cp output/data/nine_eyes_debrief.json /tmp/r
 uv run python scripts/debrief.py && diff /tmp/run1.json output/data/nine_eyes_debrief.json
 
 # 7. Lineage — no leftover exemplar scaffold strings
-grep -rn "template_code_project" . --exclude-dir=.git --exclude-dir=.venv --exclude=uv.lock || echo Clean
+grep -rn "template[_]code_project" . --exclude-dir=.git --exclude-dir=.venv --exclude=uv.lock || echo Clean
 
 # 8. git status clean after your commit(s)
 ```
