@@ -75,7 +75,7 @@ exclude_lines = [
 # this package's src/ layout). Mirrors the root gates.
 # Vendored copies are a dependency; their bytes are bound by scripts/vendor.py.
 exclude = ["(^|/)vendor/"]
-python_version = "3.10"
+python_version = "3.11"
 mypy_path = ["src"]
 explicit_package_bases = true
 warn_return_any = true
