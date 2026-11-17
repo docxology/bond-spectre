@@ -5,6 +5,30 @@ takes the film's two central premises — the Nine Eyes global surveillance-shar
 programme and the SPECTRE brotherhood — and implements them as six pure,
 deterministic analysis modules behind one frozen mission protocol.
 
+## Mission model
+
+```mermaid
+flowchart TD
+    accTitle: NINE EYES implemented mission analyses
+    accDescr: Agency-sharing graph, organization cells and monitoring targets feed Surveillance centralization and critical-node geometry; Organization structure and compromise cascades; Traffic allocation and sensor set cover. The mission adapter returns concentration, cascade damage, coverage and gap metrics with provenance, then a debrief.
+    I["Agency-sharing graph, organization cells and monitoring targets"]
+    G0["Surveillance centralization and critical-node geometry"]
+    I --> G0
+    G1["Organization structure and compromise cascades"]
+    I --> G1
+    G2["Traffic allocation and sensor set cover"]
+    I --> G2
+    O["mission.py: execute returns MissionOutcome<br/>Concentration, cascade damage, coverage and gap metrics and provenance"]
+    G0 --> O
+    G1 --> O
+    G2 --> O
+    O --> F["debrief: mission summary"]
+```
+
+The branches group implemented capabilities; they do not imply a runtime order.
+
+**Source map:** [`surveillance_net.py`](src/spectre/surveillance_net.py), [`network_geometry.py`](src/spectre/network_geometry.py); [`org_intel.py`](src/spectre/org_intel.py), [`infiltration.py`](src/spectre/infiltration.py); [`traffic_intel.py`](src/spectre/traffic_intel.py), [`signal_cover.py`](src/spectre/signal_cover.py); [`mission.py`](src/spectre/mission.py).
+
 ## Film → software
 
 | Film concept | Software payload |
