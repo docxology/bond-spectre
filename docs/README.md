@@ -1,5 +1,7 @@
 # docs — Spectre NINE EYES
 
+[Package maintenance](package-maintenance.md) covers dependency and release records.
+
 Agent- and maintainer-facing documentation for the `spectre` BOND film package
 (*Spectre*, 2015 — mission codename **NINE EYES**). Everything here describes
 *this* package: the six pure domain modules, the frozen `bond_api` adapter, and

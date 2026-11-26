@@ -1,5 +1,7 @@
 # docs/AGENTS.md — how to work inside the Spectre NINE EYES package
 
+[Package maintenance](package-maintenance.md) identifies the dependency and citation records.
+
 This file is the operating manual for an agent (or human) making changes to the
 `spectre` BOND film package. The root [`../AGENTS.md`](../AGENTS.md) is the
 authoritative rulebook; this file tells you *how to actually do the work* —
