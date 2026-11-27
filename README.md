@@ -1,6 +1,7 @@
 # Spectre — NINE EYES
 
-See [package maintenance](docs/package-maintenance.md) for dependency and citation records.
+For the distribution version, checkout Python selection, dependency sources,
+and citation records, see [package maintenance](docs/package-maintenance.md).
 
 Mission codename **NINE EYES**: the BOND film package for *Spectre* (2015). It
 takes the film's two central premises — the Nine Eyes global surveillance-sharing

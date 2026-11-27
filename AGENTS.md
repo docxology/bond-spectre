@@ -1,5 +1,8 @@
 # Spectre — NINE EYES (agent instructions)
 
+The [package maintenance guide](docs/package-maintenance.md) records the
+distribution identity, Python selection, dependency provenance, and citation metadata.
+
 ## Scope & identity
 
 - **Package**: `spectre` — BOND film package for *Spectre* (2015), mission
